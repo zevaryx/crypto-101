@@ -49,11 +49,20 @@
   // and resets when you leave; clicking it pauses or resumes (or starts it, in scroll view).
   const CP_SECONDS = 300, CP_LOW = 30, RING = 2 * Math.PI * 54;
   const timers = [...document.querySelectorAll(".cp-timer")].map((el) => ({ el, left: CP_SECONDS * 1000, end: 0, tick: 0 }));
+  const mmss = (secs) => `${String(Math.floor(secs / 60)).padStart(2, "0")}:${String(secs % 60).padStart(2, "0")}`;
+  const cpHere = () => timers.find((t) => slides[cur].contains(t.el));
+  const cpState = (t) => (t.el.classList.contains("done") ? "done" : t.tick ? "running" : t.el.classList.contains("paused") ? "paused" : "idle");
+  function cpBroadcast() {                             // mirror the current slide's timer in a presenter window
+    if (!chan || mode() === "presenter") return;
+    const t = cpHere();
+    chan.postMessage(t ? { type: "cp", left: t.left, state: cpState(t) } : { type: "cp", state: "off" });
+  }
   function cpDraw(t) {
     const secs = Math.ceil(t.left / 1000);
-    t.el.querySelector("output").textContent = `${String(Math.floor(secs / 60)).padStart(2, "0")}:${String(secs % 60).padStart(2, "0")}`;
+    t.el.querySelector("output").textContent = mmss(secs);
     t.el.querySelector(".bar").style.strokeDashoffset = (RING * (1 - t.left / (CP_SECONDS * 1000))).toFixed(2);
     t.el.classList.toggle("low", secs <= CP_LOW && secs > 0);
+    if (t === cpHere()) cpBroadcast();
   }
   function cpTick(t) {
     t.left = Math.max(0, t.end - Date.now());
@@ -64,6 +73,7 @@
       t.el.classList.add("done");
       t.el.querySelector("small").textContent = "time's up";
       t.el.closest(".slide").classList.add("cp-flash");
+      cpBroadcast();
     }
   }
   function cpStart(t) {
@@ -71,12 +81,14 @@
     t.end = Date.now() + t.left;
     t.el.classList.add("running"); t.el.classList.remove("paused");
     t.tick = setInterval(() => cpTick(t), 250);
+    cpBroadcast();
   }
   function cpPause(t) {
     if (!t.tick) return;
     clearInterval(t.tick); t.tick = 0;
     t.left = Math.max(0, t.end - Date.now());
     t.el.classList.remove("running"); t.el.classList.add("paused");
+    cpBroadcast();
   }
   function cpReset(t) {
     clearInterval(t.tick); t.tick = 0;
@@ -97,6 +109,7 @@
       if (!here) { if (t.tick || t.left !== CP_SECONDS * 1000) cpReset(t); }
       else if (!t.tick && !t.el.classList.contains("paused") && !t.el.classList.contains("done")) cpStart(t);
     });
+    cpBroadcast();
   }
 
   // ---------------------------------------------------------------------------- navigation
@@ -224,7 +237,9 @@
     const p = $("presenter");
     p.hidden = false;
     p.innerHTML = `
-      <header><b>PRESENTER</b><span id="pr-count"></span><span class="pr-timer"><output id="pr-clock">00:00</output>
+      <header><b>PRESENTER</b><span id="pr-count"></span>
+        <button type="button" class="pr-cp" id="pr-cp" hidden title="The checkpoint timer on the main screen. Click to pause or resume it."><small>CHECKPOINT</small><output>05:00</output></button>
+        <span class="pr-timer"><output id="pr-clock">00:00</output>
         <button type="button" class="btn btn-sm" id="pr-start">Start timer</button><button type="button" class="btn btn-ghost btn-sm" id="pr-reset">Reset</button></span></header>
       <section class="pr-now"><small id="pr-eyebrow"></small><h2 id="pr-title"></h2><div id="pr-notes" class="cue"></div></section>
       <aside class="pr-side"><small>NEXT</small><p id="pr-next"></p><small>PLAN</small><ol id="pr-plan"></ol></aside>
@@ -238,7 +253,16 @@
       else { clearInterval(tick); pausedFor += Date.now() - t0; t0 = null; $("pr-start").textContent = "Resume"; }
     });
     $("pr-reset").addEventListener("click", () => { clearInterval(tick); t0 = null; pausedFor = 0; clock(); $("pr-start").textContent = "Start timer"; });
+    $("pr-cp").addEventListener("click", () => chan && chan.postMessage({ type: "cp-toggle" }));
     document.title = "Presenter · Crypto 101 Lab";
+  }
+  function presenterCp(m) {                            // the main window's checkpoint timer, mirrored
+    const b = $("pr-cp");
+    b.hidden = m.state === "off";
+    if (b.hidden) return;
+    const secs = Math.ceil(m.left / 1000);
+    b.querySelector("output").textContent = m.state === "done" ? "TIME'S UP" : mmss(secs);
+    b.className = `pr-cp ${m.state}${m.state === "running" && secs <= CP_LOW ? " low" : ""}`;
   }
   function presenterDraw() {
     const s = slides[cur], n = slides[cur + 1];
@@ -253,7 +277,9 @@
   if (chan) chan.onmessage = (e) => {
     const m = e.data || {};
     if (m.type === "go") show(indexOf(m.id), false);
-    else if (m.type === "hello" && mode() !== "presenter") chan.postMessage({ type: "go", id: slides[cur].id });
+    else if (m.type === "hello" && mode() !== "presenter") { chan.postMessage({ type: "go", id: slides[cur].id }); cpBroadcast(); }
+    else if (m.type === "cp" && mode() === "presenter") presenterCp(m);
+    else if (m.type === "cp-toggle" && mode() !== "presenter") { const t = cpHere(); if (t) t.el.click(); }
   };
 
   // ---------------------------------------------------------------------------- start

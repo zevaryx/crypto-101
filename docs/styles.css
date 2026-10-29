@@ -646,3 +646,12 @@ input[type="color"] { width: 72px; height: 40px; padding: 2px; background: var(-
   .cp-timer *, .cp-timer::before, .cp-timer::after, .cp-flash > *, .slide.cp-flash::after { animation: none !important; }
 }
 @media (max-width: 560px) { .mode-scroll .cp-timer { width: 110px; height: 110px; } .mode-scroll .cp-timer output { font-size: 26px; } }
+
+/* checkpoint countdown mirrored in the presenter window */
+.pr-cp { display: grid; justify-items: center; gap: 2px; padding: 4px 14px; cursor: pointer; background: var(--panel); border: 1px solid var(--yellow); color: var(--yellow); font-family: var(--mono); }
+.pr-cp small { font-size: 10px; letter-spacing: .18em; color: var(--muted); }
+.pr-cp output { font: 700 26px/1 var(--mono); font-variant-numeric: tabular-nums; }
+.pr-cp.paused output { animation: cp-blink 1s steps(1) infinite; }
+.pr-cp.low, .pr-cp.done { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 16px var(--pink-glow); }
+.pr-cp.low output { animation: cp-throb 1s ease-in-out infinite; }
+.pr-cp.done output { animation: cp-blink .5s steps(1) infinite; }
