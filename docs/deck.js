@@ -18,7 +18,7 @@
   const mode = () => (root.classList.contains("mode-presenter") ? "presenter" : root.classList.contains("mode-scroll") ? "scroll" : "slides");
   const indexOf = (id) => Math.max(0, slides.findIndex((s) => s.id === id));
   const titleOf = (s) => (s.querySelector("h2, h1") || {}).textContent || s.id;
-  const notesOf = (s) => (s.querySelector(".notes") || {}).textContent || "No notes for this slide.";
+  const notesOf = (s) => (s.querySelector(".notes") || {}).innerHTML || "<p>No notes for this slide.</p>";   // our own static markup
 
   // ---------------------------------------------------------------------------- slide furniture
   slides.forEach((s, i) => {
@@ -27,7 +27,7 @@
     s.setAttribute("aria-label", `${i + 1} of ${slides.length}: ${titleOf(s).trim()}`);
     const foot = document.createElement("footer");
     foot.className = "slide-foot";
-    foot.innerHTML = `<b>${s.dataset.num}</b><span>CRYPTOGRAPHY</span><span>${part ? `PART ${part} · ${PARTS[part].toUpperCase()}` : "A BEGINNER'S GUIDE"}</span>`;
+    foot.innerHTML = `<b>${s.dataset.num}</b><span>CRYPTOGRAPHY</span><span>${part ? `PART ${part} · ${PARTS[part].toUpperCase()}` : s.dataset.label || "A BEGINNER'S GUIDE"}</span>`;
     s.append(foot);
   });
 
@@ -41,7 +41,62 @@
     root.classList.add("mode-" + m);
     if (save) store.set("deck-mode", m);
     if (m === "slides") { fit(); show(cur, false); }
-    else requestAnimationFrame(() => slides[cur].scrollIntoView({ block: "start" }));
+    else { cpFollow(slides[cur]); requestAnimationFrame(() => slides[cur].scrollIntoView({ block: "start" })); }
+  }
+
+  // ---------------------------------------------------------------------------- checkpoint timers
+  // Each checkpoint slide has a 5-minute countdown. In slide mode it starts when the slide appears
+  // and resets when you leave; clicking it pauses or resumes (or starts it, in scroll view).
+  const CP_SECONDS = 300, CP_LOW = 30, RING = 2 * Math.PI * 54;
+  const timers = [...document.querySelectorAll(".cp-timer")].map((el) => ({ el, left: CP_SECONDS * 1000, end: 0, tick: 0 }));
+  function cpDraw(t) {
+    const secs = Math.ceil(t.left / 1000);
+    t.el.querySelector("output").textContent = `${String(Math.floor(secs / 60)).padStart(2, "0")}:${String(secs % 60).padStart(2, "0")}`;
+    t.el.querySelector(".bar").style.strokeDashoffset = (RING * (1 - t.left / (CP_SECONDS * 1000))).toFixed(2);
+    t.el.classList.toggle("low", secs <= CP_LOW && secs > 0);
+  }
+  function cpTick(t) {
+    t.left = Math.max(0, t.end - Date.now());
+    cpDraw(t);
+    if (t.left === 0) {
+      clearInterval(t.tick); t.tick = 0;
+      t.el.classList.remove("running");
+      t.el.classList.add("done");
+      t.el.querySelector("small").textContent = "time's up";
+      t.el.closest(".slide").classList.add("cp-flash");
+    }
+  }
+  function cpStart(t) {
+    if (t.tick || t.left === 0) return;
+    t.end = Date.now() + t.left;
+    t.el.classList.add("running"); t.el.classList.remove("paused");
+    t.tick = setInterval(() => cpTick(t), 250);
+  }
+  function cpPause(t) {
+    if (!t.tick) return;
+    clearInterval(t.tick); t.tick = 0;
+    t.left = Math.max(0, t.end - Date.now());
+    t.el.classList.remove("running"); t.el.classList.add("paused");
+  }
+  function cpReset(t) {
+    clearInterval(t.tick); t.tick = 0;
+    t.left = CP_SECONDS * 1000;
+    t.el.classList.remove("running", "paused", "done", "low");
+    t.el.querySelector("small").textContent = "discussion";
+    t.el.closest(".slide").classList.remove("cp-flash");
+    cpDraw(t);
+  }
+  timers.forEach((t) => {
+    t.el.querySelector(".bar").style.strokeDasharray = RING.toFixed(2);
+    cpDraw(t);
+    t.el.addEventListener("click", () => (t.tick ? cpPause(t) : t.left === 0 ? (cpReset(t), cpStart(t)) : cpStart(t)));
+  });
+  function cpFollow(s) {                               // called on every slide change
+    timers.forEach((t) => {
+      const here = mode() === "slides" && s.contains(t.el);
+      if (!here) { if (t.tick || t.left !== CP_SECONDS * 1000) cpReset(t); }
+      else if (!t.tick && !t.el.classList.contains("paused") && !t.el.classList.contains("done")) cpStart(t);
+    });
   }
 
   // ---------------------------------------------------------------------------- navigation
@@ -54,9 +109,10 @@
     $("ui-count").textContent = `${cur + 1} / ${slides.length}`;
     $("progress-bar").style.width = `${((cur + 1) / slides.length) * 100}%`;
     $("notes-title").textContent = `${s.dataset.num} · ${titleOf(s)}`;
-    $("notes-text").textContent = notesOf(s);
+    $("notes-text").innerHTML = notesOf(s);
     document.querySelectorAll(".scroll-parts a").forEach((a) => a.classList.toggle("active", +a.dataset.part === +s.dataset.part));
     if (mode() === "presenter") presenterDraw();
+    cpFollow(s);
     if (broadcast && chan) chan.postMessage({ type: "go", id: s.id });
   }
   const next = () => show(cur + 1);
@@ -138,6 +194,7 @@
   $("ui-notes").addEventListener("click", toggleNotes);
   $("ui-presenter").addEventListener("click", openPresenter);
   $("ui-full").addEventListener("click", fullscreen);
+  $("ui-print").addEventListener("click", () => window.print());     // print styles lay out one slide per page
   document.querySelectorAll("[data-mode]").forEach((b) => b.addEventListener("click", () => setMode(b.dataset.mode, true)));
   // links to other slides (e.g. the roadmap) jump inside the deck
   document.addEventListener("click", (e) => {
@@ -169,7 +226,7 @@
     p.innerHTML = `
       <header><b>PRESENTER</b><span id="pr-count"></span><span class="pr-timer"><output id="pr-clock">00:00</output>
         <button type="button" class="btn btn-sm" id="pr-start">Start timer</button><button type="button" class="btn btn-ghost btn-sm" id="pr-reset">Reset</button></span></header>
-      <section class="pr-now"><small id="pr-eyebrow"></small><h2 id="pr-title"></h2><p id="pr-notes"></p></section>
+      <section class="pr-now"><small id="pr-eyebrow"></small><h2 id="pr-title"></h2><div id="pr-notes" class="cue"></div></section>
       <aside class="pr-side"><small>NEXT</small><p id="pr-next"></p><small>PLAN</small><ol id="pr-plan"></ol></aside>
       <footer><button type="button" class="btn btn-ghost" id="pr-prev">‹ Previous</button><button type="button" class="btn" id="pr-nextbtn">Next ›</button></footer>`;
     let end = 0;                                       // part lengths include their 5-minute checkpoint (120 min total)
@@ -188,7 +245,7 @@
     $("pr-count").textContent = `Slide ${cur + 1} of ${slides.length} · deck slide ${s.dataset.num}`;
     $("pr-eyebrow").textContent = (s.querySelector(".eyebrow") || {}).textContent || "";
     $("pr-title").textContent = titleOf(s);
-    $("pr-notes").textContent = notesOf(s);
+    $("pr-notes").innerHTML = notesOf(s);
     $("pr-next").textContent = n ? `${n.dataset.num} · ${titleOf(n)}` : "End of the deck";
     document.querySelectorAll("#pr-plan li").forEach((li) => li.classList.toggle("here", +li.dataset.part === +s.dataset.part));
   }

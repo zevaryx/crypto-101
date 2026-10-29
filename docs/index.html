@@ -7,9 +7,8 @@
 <meta name="description" content="Intro to Cryptography: A Beginner's Guide, as a live slide deck. Ciphers, hashing, AES, RSA, elliptic curves and post-quantum ideas, with every example running in your browser.">
 <meta name="theme-color" content="#07060f">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2307060f'/%3E%3Cpath d='M10 14v-3a6 6 0 0 1 12 0v3' fill='none' stroke='%2300f0ff' stroke-width='2.5'/%3E%3Crect x='7' y='14' width='18' height='13' fill='%23ff2e88'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap">
+<link rel="preload" href="fonts/chakra-petch-latin-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/jetbrains-mono-latin-var.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script>
   /* pick the layout before first paint: slides on a big screen, scrolling on a phone */
@@ -49,6 +48,7 @@
       <p class="lede">How we keep digital information private and trustworthy: hashing, encryption, signatures, and what quantum computers change.</p>
       <p class="muted">No background needed · questions welcome any time</p>
       <p class="keys-hint"><kbd>→</kbd> next <kbd>N</kbd> notes <kbd>P</kbd> presenter <kbd>O</kbd> overview <kbd>F</kbd> full screen</p>
+      <div class="follow"><img src="qr.svg" alt="QR code linking to zevaryx.github.io/crypto-101" width="96" height="96"><p>Follow along and run every demo on your phone:<br><a href="https://zevaryx.github.io/crypto-101/">zevaryx.github.io/crypto-101</a></p></div>
     </div>
     <div class="frame hero-term">
       <div class="term-bar"><span>terminal</span><span class="dots"><i></i><i></i><i></i></span></div>
@@ -59,7 +59,7 @@
       <p class="comment" id="hero-note"></p>
     </div>
   </div>
-  <div class="notes">~1 min. Welcome. This is a 2-hour teaching talk with a 5-minute discussion checkpoint after each part. Invite questions at any time. Point at the terminal: change one letter and the whole hash changes. (The inputs are live: type in them.)</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>Welcome. Two hours, five parts, and a 5-minute discussion checkpoint after each part. Questions are welcome any time.</span></li><li><b class="show">Show</b><span>The terminal: &quot;hello&quot; and &quot;Hello&quot; differ by one letter, but their fingerprints share nothing. Type in either box to try another word.</span></li><li><b class="say">Say</b><span>Everything on these slides runs live in the browser. Scan the QR code to follow along on your phone.</span></li><li><b class="next">Next</b><span>&quot;Here&#x27;s the plan for today.&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 02 ROADMAP -->
@@ -75,7 +75,7 @@
     </ol>
     <p class="callout"><b>CHECKPOINT</b> after every part: 5 minutes to discuss. Questions welcome at any time.</p>
   </div>
-  <div class="notes">~1 min. Walk through the five parts and their timings (25/20/35/25/15 = 120 min). Mention the checkpoints. Tell students they can interrupt. Each part title is a link.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>Five parts: foundations, hashing, symmetric encryption, asymmetric, then the future and a wrap-up.</span></li><li><b class="say">Say</b><span>Each part ends with a 5-minute checkpoint where you talk with a neighbour.</span></li><li><b class="tip">Tip</b><span>The parts add up to 120 minutes. The presenter window (P) shows when each part should finish.</span></li><li><b class="next">Next</b><span>&quot;First: what is cryptography actually for?&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 03 GOALS -->
@@ -91,7 +91,7 @@
     </div>
     <p class="callout">You use all four every day: messaging, online banking, logging in, and every https:// page.</p>
   </div>
-  <div class="notes">~3 min. Ask: which of these four goals does a banking app need? (All four.) Define each in plain words. Confidentiality = secrecy; integrity = unchanged; authentication = who; non-repudiation = can't deny.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Cryptography keeps information safe when other people might be watching it, or trying to change it.</span></li><li><b class="say">Say</b><span>The four goals in plain words: confidentiality = secret, integrity = unchanged, authentication = who, non-repudiation = can&#x27;t deny it later.</span></li><li><b class="ask">Ask</b><span>Which of these does a banking app need? <em>Answer: All four.</em></span></li><li><b class="next">Next</b><span>&quot;Let&#x27;s start with the oldest trick in the book.&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 04 CAESAR -->
@@ -113,7 +113,7 @@
       <div class="card"><b>What modern ciphers fix</b><span>A huge number of keys, so guessing is hopeless. Heavy scrambling that hides letter patterns. And the method can be public: only the key is secret.</span></div>
     </div>
   </div>
-  <div class="notes">~3 min. Live demo idea: have students decrypt KHOOR by hand. Then ask how they would crack a long Caesar message (try all 25 shifts; count letters). Lesson: small key space and visible patterns are fatal. Next slide cracks it live.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Shift every letter forward by the key. With key 3, HELLO becomes KHOOR.</span></li><li><b class="show">Show</b><span>Drag the key slider. The pink cells in the alphabet strip show which letter becomes which.</span></li><li><b class="ask">Ask</b><span>Decrypt KHOOR in your head. <em>Answer: Shift each letter back 3: HELLO.</em></span></li><li><b class="say">Say</b><span>The key is one number from 1 to 25. That&#x27;s the weakness.</span></li><li><b class="next">Next</b><span>&quot;How would you crack it?&quot;</span></li></ul></div>
 </section>
 
 <section class="slide" id="caesar-crack" data-part="1" data-num="04">
@@ -131,7 +131,7 @@
       <pre class="term" id="caesar-freq"></pre>
     </div>
   </div>
-  <div class="notes">~1 min (part of the Caesar slide). Change the key on the previous slide and come back: both attacks still win. Next: can we fix the letter-counting problem?</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>Attack 1: try all 25 keys. One line reads as English: key 3 gives HELLO.</span></li><li><b class="say">Say</b><span>Attack 2: count letters. E is the most common letter in English. The tallest bar is H, three letters after E, so the key is 3.</span></li><li><b class="tip">Tip</b><span>Change the key on the previous slide and come back: both attacks still win.</span></li><li><b class="say">Say</b><span>Lesson: too few keys, and visible letter patterns, are both fatal.</span></li><li><b class="next">Next</b><span>&quot;Can we hide the letter patterns?&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 05 VIGENERE -->
@@ -149,7 +149,7 @@
       <div class="card"><b>Why it still fails</b><span>The keyword repeats. Codebreakers found the key length from repeated patterns, then solved each position like a Caesar cipher (1800s).</span></div>
     </div>
   </div>
-  <div class="notes">~4 min. Work the first two letters aloud: A with L shifts 11, T with E shifts 4. Point out the four A's turning into four different letters, which defeats letter counting. Then explain the weakness: the key repeats, so patterns leak the key length.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Use a keyword instead of one number. Each keyword letter is a different shift.</span></li><li><b class="show">Show</b><span>First letter: A with L. L is letter 12, so shift 11, and A becomes L. Next, T with E: shift 4, and T becomes X.</span></li><li><b class="show">Show</b><span>The four A&#x27;s in ATTACKATDAWN (outlined) turn into L, O, E and N. Letter counting stops working.</span></li><li><b class="say">Say</b><span>People called it &quot;the unbreakable cipher&quot; for about 300 years.</span></li><li><b class="next">Next</b><span>&quot;But it has a weakness: the keyword repeats.&quot;</span></li></ul></div>
 </section>
 
 <section class="slide" id="vigenere-break" data-part="1" data-num="05">
@@ -159,7 +159,7 @@
     <div class="bars bars-ic" id="vig-ic"></div>
     <pre class="term" id="vig-break"></pre>
   </div>
-  <div class="notes">Show the spike at the true key length, then the recovered keyword. Ask: what if the key never repeated? (Next slide.) Try a keyword longer than 12 letters on the previous slide to see the attack fail.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>Guess the key length right, and every 5th letter was shifted by the same amount. Each of those columns is just a Caesar cipher.</span></li><li><b class="show">Show</b><span>The bars: the right length (5 for LEMON) looks like English and stands out. Multiples like 10 spike too.</span></li><li><b class="say">Say</b><span>Solve each column with letter counting and the keyword falls out: LEMON.</span></li><li><b class="ask">Ask</b><span>What if the key never repeated? <em>Answer: That&#x27;s the one-time pad, next.</em></span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 06 OTP -->
@@ -188,7 +188,7 @@
       <button type="button" class="btn btn-ghost btn-sm" id="otp-reuse-new">Try another key</button>
     </div>
   </div>
-  <div class="notes">~4 min. Same shifting as Vigenère, but the key is random and as long as the message. Show that EQNVZ could decrypt to HELLO or LATER, so an attacker learns nothing. Stress the four rules, especially "never reuse". Sharing a huge key for every message is painful, and reuse broke it in the 1940s. This returns later as XOR and as nonce reuse in AES modes.</div>
+  <div class="notes"><p class="time">~4 min</p><ul><li><b class="say">Say</b><span>A one-time pad is Vigenère with a random key as long as the message.</span></li><li><b class="show">Show</b><span>HELLO + key XMCKL = EQNVZ. Under &quot;Any other word&quot;: the same EQNVZ decrypts to LATER with key TQURI. Type any 5-letter word: there is always a key that fits.</span></li><li><b class="say">Say</b><span>So the ciphertext tells an attacker nothing. That&#x27;s &quot;perfect secrecy&quot;.</span></li><li><b class="say">Say</b><span>Read the four rules. The one people break is rule 3: reusing the key.</span></li><li><b class="show">Show</b><span>Right side: one key used twice. Combine the two ciphertexts and the key cancels out; knowing one message reveals the other. This really happened in the 1940s.</span></li><li><b class="next">Next</b><span>&quot;A real machine that tried to get close to this.&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 07 ENIGMA -->
@@ -211,7 +211,7 @@
       <div class="keys" id="en-keys" tabindex="0" aria-label="Enigma keyboard: type letters here"></div>
     </div>
   </div>
-  <div class="notes">~4 min. Story time. Walk the signal path: key press, plugboard, three rotors, reflector, back through the rotors, lamp. Press H from AAA: lamp I lights. The rotors turn after every key, so pressing A five times gives B D Z G O.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Press a key and the current runs through the plugboard, three rotors, a reflector, back through the rotors, and lights a lamp.</span></li><li><b class="show">Show</b><span>Click a key (or click the keyboard and type). From AAA, H lights lamp I. The rotor windows step after every key press.</span></li><li><b class="show">Show</b><span>Type a word, press Reset, then type the lamp letters back in: the word comes back. The same settings decrypt.</span></li><li><b class="next">Next</b><span>&quot;So why didn&#x27;t it last?&quot;</span></li></ul></div>
 </section>
 
 <section class="slide" id="enigma-history" data-part="1" data-num="07">
@@ -227,7 +227,7 @@
       <div class="card"><b>Why it still fell</b><span>A letter never became itself, and operators repeated predictable phrases. Polish mathematicians, then Alan Turing's team at Bletchley Park, built machines to test settings quickly.</span></div>
     </div>
   </div>
-  <div class="notes">Ask: what does it mean that a letter can never become itself? (It leaks information, and codebreakers used it.) Link back to the one-time pad: Enigma was a very complicated Vigenère-style cipher with a repeating-but-huge key. Settings are the key, and they had to be shared in advance: the key-distribution problem again.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>Pressing A five times gives B D Z G O: the same key, a different letter each time, because the rotors turn.</span></li><li><b class="say">Say</b><span>About 159 quintillion settings: far too many to try by hand.</span></li><li><b class="say">Say</b><span>But a letter never encrypts to itself (0 of 520 here). With predictable phrases like weather reports, that let Polish mathematicians, then Turing&#x27;s team at Bletchley Park, build machines to test settings fast.</span></li><li><b class="say">Say</b><span>The settings were the key, and both sides had to share them in advance. That key-sharing problem comes back in Part 4.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 08 HASH VS ENCRYPT -->
@@ -251,17 +251,17 @@
       </tbody>
     </table></div>
   </div>
-  <div class="notes">~2 min. Key contrast: hashing is one-way with no key; encryption is reversible with a key. Don't dwell on the table; the checkpoint will test it.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Two different tools. Hashing is a one-way fingerprint with no key. Encryption is a reversible lock with a key.</span></li><li><b class="show">Show</b><span>Type in the box. The SHA-256 output is always 32 bytes. The AES-GCM output grows with the input, and the key turns it back into the message.</span></li><li><b class="tip">Tip</b><span>Don&#x27;t read the table aloud; the checkpoint tests it.</span></li><li><b class="next">Next</b><span>&quot;Time for our first checkpoint.&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 09 CHECKPOINT 1 -->
 <section class="slide slide-checkpoint" id="checkpoint-1" data-part="1" data-num="09">
-  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 1 · 5 MIN</p><h2>Pause and discuss</h2></header>
+  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 1 · 5 MIN</p><h2>Pause and discuss</h2><button type="button" class="cp-timer" title="Click to pause or resume" aria-label="5-minute discussion timer. Click to pause or resume."><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54"/><circle class="bar" cx="60" cy="60" r="54"/></svg><output>05:00</output><small>discussion</small></button></header>
   <div class="slide-body stack">
     <p class="note">Talk with a neighbour for a couple of minutes, then we share answers. Guesses are welcome: there are no wrong answers yet.</p>
     <ol class="checkpoint" data-cp="0"></ol>
   </div>
-  <div class="notes">5 min discussion. Let pairs talk 2 minutes, then take 2-3 answers. Q2 is the key one: hashing lets a site check a password without ever being able to recover it.</div>
+  <div class="notes"><p class="time">5 min</p><ul><li><b class="show">Show</b><span>Pairs talk for 2 minutes, then take 2 or 3 answers from the room.</span></li><li><b class="say">Say</b><span>Spend most time on Q2: hashing lets a site check your password without ever being able to recover it.</span></li><li><b class="tip">Tip</b><span>Each question has a folded Answer if you need it.</span></li><li><b class="tip">Tip</b><span>Timing: Part 1 should finish around minute 25.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 10 AVALANCHE -->
@@ -290,7 +290,7 @@
       <p class="note" id="av-count"></p>
     </div>
   </div>
-  <div class="notes">~4 min. Four properties: deterministic, fixed size, avalanche, one-way. Show the block diagram: pad, split, mix each block into a running value. Flipping bit 2 of "hello" gives "Hello", the title-slide example.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Skim the five properties: deterministic, fixed size, avalanche, one-way, no twins.</span></li><li><b class="show">Show</b><span>The right side flips one bit of &quot;hello&quot;. Bit 2 turns h into H: the title-slide example. About half of the 256 output bits change; each pink square is one.</span></li><li><b class="show">Show</b><span>Drag the slider to flip other bits. It&#x27;s always about half.</span></li><li><b class="say">Say</b><span>The diagram: MD5, SHA-1 and SHA-2 pad the message, cut it into blocks, and mix each block into a running value.</span></li><li><b class="next">Next</b><span>&quot;Let&#x27;s open up SHA-256.&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 11 SHA-256 -->
@@ -315,7 +315,7 @@
       <p class="note"><b>Caution:</b> SHA-256 alone can be extended by attackers; HMAC or SHA-3 avoids that.</p>
     </div>
   </div>
-  <div class="notes">~4 min. Don't try to explain every round. Focus on "abc" going in and a fixed 256-bit hash coming out. Drag the round slider to show the scrambling. Ask: what happens if I change abc to abd? (Shown at the bottom right.)</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>SHA-256: 512-bit chunks, 64 rounds, 8 internal 32-bit values, a 256-bit result.</span></li><li><b class="show">Show</b><span>&quot;abc&quot; is 3 bytes (61 62 63), then the 80 end marker, zeros, and the length in bits at the end: 0x18 = 24.</span></li><li><b class="show">Show</b><span>Drag the round slider from 0 to 64. Every round scrambles the 8 values; after round 64 they become the hash.</span></li><li><b class="ask">Ask</b><span>What happens if we change abc to abd? <em>Answer: A completely different hash, shown bottom right.</em></span></li><li><b class="tip">Tip</b><span>Don&#x27;t explain the round function. The point is &quot;every input bit affects everything&quot;.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 12 BREAKS -->
@@ -336,7 +336,7 @@
       <div class="card card-ok"><b>Use instead</b><span>SHA-256, SHA-384 or SHA-512 (the SHA-2 family). SHA-3 (a newer, different design). BLAKE2 / BLAKE3 for speed. For passwords: Argon2id, bcrypt, scrypt.</span></div>
     </div>
   </div>
-  <div class="notes">~3 min. Timeline of breaks. Key message: "broken" means attackers can make collisions on purpose. Use SHA-256 or SHA-3 for new work.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>&quot;Broken&quot; means attackers can make two inputs with the same hash on purpose.</span></li><li><b class="say">Say</b><span>Walk the timeline: MD5 collisions in 2004, a fake certificate in 2008, the Flame malware in 2012, the first SHA-1 collision in 2017.</span></li><li><b class="say">Say</b><span>For new work use SHA-256, SHA-3 or BLAKE2. For passwords use Argon2id or bcrypt.</span></li><li><b class="next">Next</b><span>&quot;Let&#x27;s find a collision ourselves.&quot;</span></li></ul></div>
 </section>
 
 <section class="slide" id="collisions" data-part="2" data-num="12">
@@ -357,7 +357,7 @@
       <div class="table-wrap"><table class="algs" id="alg-table"></table></div>
     </div>
   </div>
-  <div class="notes">Run the collision hunt at 24 bits (a few thousand tries), then 32 bits (~65,000). A full SHA-256 would need about 2^128 tries. The table shows that MD5 and SHA-1 still produce output: "broken" doesn't mean they stop working, it means attackers can forge collisions.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>A full hash is too big to collide by luck, so keep only the first 24 bits.</span></li><li><b class="show">Show</b><span>Press Hunt. It finds a collision after a few thousand tries, near 2^12 = 4,096, not 2^24 = 16 million. That&#x27;s the birthday effect.</span></li><li><b class="say">Say</b><span>For full SHA-256 that would be about 2^128 tries: out of reach. MD5 and SHA-1 had shortcuts.</span></li><li><b class="tip">Tip</b><span>Optional: the table shows MD5 and SHA-1 still run fine. &quot;Broken&quot; is about forging collisions, not about the function failing.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 13 SALT -->
@@ -375,7 +375,7 @@
     </div>
     <p class="note">Salt defeats rainbow tables (huge lists of pre-computed hashes) and is not secret. Pepper lives in a vault, is hard to change later (track which version was used), and is mixed in before hashing.</p>
   </div>
-  <div class="notes">~4 min. Ask: why store the salt next to the hash? (It isn't secret; it just forces attackers to work per user.) Pepper is secret and kept outside the database.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Alice and Bob both pick the password &quot;sunshine&quot;.</span></li><li><b class="show">Show</b><span>Left, no salt: identical hashes, and the attacker&#x27;s pre-computed table cracks it instantly.</span></li><li><b class="show">Show</b><span>Middle, a random salt per user stored beside the hash: different hashes, the table is useless, and each user must be cracked separately.</span></li><li><b class="show">Show</b><span>Right, a pepper: one secret for the whole app, kept outside the database. Steal only the database and you can&#x27;t even test a guess.</span></li><li><b class="ask">Ask</b><span>Why is it fine to store the salt in the database? <em>Answer: It isn&#x27;t secret; it only forces attackers to work on each user separately.</em></span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 14 PASSWORD HASHING -->
@@ -395,7 +395,7 @@
     <div class="controls"><button type="button" class="btn" id="bench-run">Time them on this device</button><span class="note" id="bench-status"></span></div>
     <p class="callout"><b>RULE OF THUMB</b> Use Argon2id if you can, otherwise bcrypt. Pick settings so one hash takes about 0.2 to 0.5 seconds on your server, and raise them as computers get faster. Always add a unique salt.</p>
   </div>
-  <div class="notes">~3 min. Read the table left to right. Press the button to time each method live on this laptop. Rule of thumb: Argon2id, otherwise bcrypt. Settings are tuned so one hash takes a fraction of a second.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>For passwords you want a hash that is slow on purpose.</span></li><li><b class="show">Show</b><span>Press &quot;Time them on this device&quot;. SHA-256 takes microseconds; PBKDF2, bcrypt, scrypt and Argon2id take milliseconds each.</span></li><li><b class="say">Say</b><span>That&#x27;s nothing for one login, but enormous for billions of guesses.</span></li><li><b class="say">Say</b><span>Rule of thumb: Argon2id, otherwise bcrypt. Tune it so one hash takes about 0.2 to 0.5 seconds on your server.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 15 SLOW HASHING -->
@@ -424,17 +424,17 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     </div>
     <div class="stats" id="crack-out"></div>
   </div>
-  <div class="notes">~3 min. Work through the cracking example: fast hash = minutes, tuned Argon2id = years. Try length 12 to show how fast the numbers grow. Numbers are illustrative, not measured.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Each slows attackers differently: PBKDF2 repeats, bcrypt has a cost dial, Argon2id needs lots of memory, which graphics cards hate.</span></li><li><b class="show">Show</b><span>The estimator: 8 characters of lowercase + digits is 2.8 trillion passwords. A fast hash cracks it in about 5 minutes; tuned Argon2id takes about 9 years.</span></li><li><b class="show">Show</b><span>Change the length to 12 to see how fast it grows.</span></li><li><b class="tip">Tip</b><span>The guess rates are illustrative, not measured.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 16 CHECKPOINT 2 -->
 <section class="slide slide-checkpoint" id="checkpoint-2" data-part="2" data-num="16">
-  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 2 · 5 MIN</p><h2>Pause and discuss</h2></header>
+  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 2 · 5 MIN</p><h2>Pause and discuss</h2><button type="button" class="cp-timer" title="Click to pause or resume" aria-label="5-minute discussion timer. Click to pause or resume."><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54"/><circle class="bar" cx="60" cy="60" r="54"/></svg><output>05:00</output><small>discussion</small></button></header>
   <div class="slide-body stack">
     <p class="note">Talk with a neighbour for a couple of minutes, then we share answers. Guesses are welcome: there are no wrong answers yet.</p>
     <ol class="checkpoint" data-cp="1"></ol>
   </div>
-  <div class="notes">5 min discussion. Let pairs talk, then share. Q1: identical hashes reveal identical passwords.</div>
+  <div class="notes"><p class="time">5 min</p><ul><li><b class="show">Show</b><span>Pairs talk for 2 minutes, then share.</span></li><li><b class="say">Say</b><span>Q1 is the key one: identical unsalted hashes reveal identical passwords.</span></li><li><b class="tip">Tip</b><span>Timing: Part 2 should finish around minute 45.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 17 XOR -->
@@ -461,7 +461,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </ul>
     </div>
   </div>
-  <div class="notes">~4 min. Walk through the XOR example: P xor K = C, then C xor K = P. The default key 00111010 matches the slide. Kerckhoffs: the method is public, only the key is secret.</div>
+  <div class="notes"><p class="time">~4 min</p><ul><li><b class="say">Say</b><span>Encryption: plaintext plus a key makes ciphertext, and the same key reverses it.</span></li><li><b class="show">Show</b><span>XOR flips a bit wherever the key has a 1. H (01001000) with key 00111010 gives 01110010, the letter r. XOR with the key again and H comes back.</span></li><li><b class="show">Show</b><span>Click key bits to flip them.</span></li><li><b class="say">Say</b><span>Kerckhoffs&#x27;s principle: the method is public; only the key is secret. A 128-bit key has 2^128 possible values.</span></li><li><b class="next">Next</b><span>&quot;But how do two people get the same key?&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 18 SYM VS ASYM -->
@@ -483,7 +483,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     </table></div>
     <p class="callout"><b>IN PRACTICE, BOTH</b> TLS (the lock in your browser) uses asymmetric encryption to agree on a key, then AES-GCM to encrypt the data.</p>
   </div>
-  <div class="notes">~3 min. Ask: how do two people who have never met share a secret key? That tension motivates asymmetric encryption. Mention TLS uses both.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Symmetric: one shared key. Fast, but you must share it secretly first.</span></li><li><b class="say">Say</b><span>Asymmetric: a key pair. Anyone can lock with Bob&#x27;s public key; only Bob&#x27;s private key unlocks it. Slower, but nothing secret to share up front.</span></li><li><b class="ask">Ask</b><span>How do two people who&#x27;ve never met share a secret key? <em>Answer: Leave it open: Part 4 answers it.</em></span></li><li><b class="say">Say</b><span>In practice TLS uses both: asymmetric to agree on a key, then AES-GCM for the data.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 19 AES -->
@@ -509,7 +509,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </div>
     </div>
   </div>
-  <div class="notes">~4 min. Think of AES as a recipe repeated 10-14 times: swap bytes, shift rows, blend columns, mix in the key. No need to memorise. The next slide steps through it live.</div>
+  <div class="notes"><p class="time">~4 min</p><ul><li><b class="say">Say</b><span>AES is the standard symmetric cipher. It scrambles a 4 × 4 grid of 16 bytes.</span></li><li><b class="say">Say</b><span>Each round: SubBytes swaps bytes using a table, ShiftRows slides the rows, MixColumns blends each column, AddRoundKey mixes in the key.</span></li><li><b class="say">Say</b><span>Only AddRoundKey uses the key; every other step is public.</span></li><li><b class="say">Say</b><span>10 rounds for AES-128, 12 for AES-192, 14 for AES-256. No need to memorise this.</span></li><li><b class="next">Next</b><span>&quot;Let&#x27;s watch it happen.&quot;</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 20 AES BY EXAMPLE -->
@@ -535,7 +535,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </div>
     </div>
   </div>
-  <div class="notes">~4 min. This is the official FIPS-197 example. Drag the step slider: pink cells are the bytes that just changed. At the end the ciphertext matches the published test vector.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="show">Show</b><span>This is the official FIPS-197 example. Drag the step slider; pink cells are the bytes that just changed.</span></li><li><b class="say">Say</b><span>SubBytes changes every byte. ShiftRows only moves bytes. MixColumns blends them. AddRoundKey shows the round key it used.</span></li><li><b class="show">Show</b><span>At the last step the ciphertext matches the published test vector (69c4e0d8…).</span></li><li><b class="tip">Tip</b><span>The right box has the slide&#x27;s sample values: 0x53 → 0xED, and DB 13 53 45 → 8E 4D A1 BC.</span></li></ul></div>
 </section>
 
 <section class="slide" id="aes-avalanche" data-part="3" data-num="20">
@@ -555,7 +555,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </ul>
     </div>
   </div>
-  <div class="notes">Show the avalanche: a 1-bit change spreads to the whole block. About 64 of 128 bits differ.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>Two inputs that differ in one bit give outputs that differ in about half of their 128 bits.</span></li><li><b class="say">Say</b><span>ShiftRows and MixColumns spread any change across the whole block within 2 rounds.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 21 MODES -->
@@ -572,7 +572,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <div><h3>GCM <span class="tag tag-c">recommended</span></h3><pre class="term" id="modes-gcm"></pre></div>
     </div>
   </div>
-  <div class="notes">~4 min. AES only handles one 16-byte block; a mode says how to chain blocks. Same-coloured ECB blocks are identical ciphertext. Default recommendation: GCM.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>AES encrypts one 16-byte block. A mode says how to handle longer messages.</span></li><li><b class="show">Show</b><span>ECB: &quot;ATTACK AT DAWN!!&quot; twice gives two identical ciphertext blocks, in the same colour. Patterns leak.</span></li><li><b class="show">Show</b><span>CBC: each block is mixed with the previous one, so the repeats look different.</span></li><li><b class="show">Show</b><span>GCM: ciphertext plus a 16-byte tag, the tamper check. This is the recommended default.</span></li><li><b class="tip">Tip</b><span>Invite someone to suggest a repetitive message to type.</span></li></ul></div>
 </section>
 
 <section class="slide" id="modes-compared" data-part="3" data-num="21">
@@ -593,7 +593,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </tbody>
     </table></div>
   </div>
-  <div class="notes">Walk the two diagrams, then the table. Default recommendation: GCM.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>CBC chains each block to the last. CTR and GCM encrypt a counter to make a stream.</span></li><li><b class="say">Say</b><span>Read the verdict column: ECB never, CBC old, CTR needs a tamper check, GCM is the default, XTS is only for disks.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 22 MODE ISSUES -->
@@ -605,7 +605,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     <div><b>CTR: nonce reuse</b><p>Reusing a nonce (a number meant to be used once) repeats the scrambled stream, so attackers can combine two messages and cancel it out. Tampering also goes unnoticed.</p><em>Fix: never repeat a nonce; add a tamper check.</em></div>
     <div><b>GCM: never reuse a nonce</b><p>Repeating a nonce leaks the secret behind the tamper check, so attackers can forge messages. Random nonces can collide after about 4 billion messages.</p><em>Fix: use counters for nonces, change keys often, or use AES-GCM-SIV.</em></div>
   </div>
-  <div class="notes">~4 min. Four flaws: ECB patterns, CBC padding oracle, CTR nonce reuse, GCM nonce reuse. The next three slides show ECB and nonce reuse live.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Each mode has a classic mistake.</span></li><li><b class="say">Say</b><span>ECB: patterns survive. The next slide shows it.</span></li><li><b class="say">Say</b><span>CBC: if a server reveals whether the padding was valid, attackers can work out the message (POODLE, Lucky13).</span></li><li><b class="say">Say</b><span>CTR and GCM: never reuse a nonce. It repeats the stream, and in GCM it also lets attackers forge messages.</span></li><li><b class="say">Say</b><span>The fix almost every time: authenticated encryption like AES-GCM, with a counter as the nonce.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 23 PADLOCK -->
@@ -622,7 +622,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <p class="note">Real AES, 16 bytes (4 pixels) at a time; each encrypted block is drawn as one colour. ECB encrypts each block separately, so identical blocks give identical results and flat areas keep their outline. CBC mixes in a random starting value, so repeats look different.</p>
     </div>
   </div>
-  <div class="notes">~4 min. This is the ECB demo. Ask students what they can still see in the ECB picture before revealing the explanation. CBC looks like noise. The encryption really happens in the browser: press the button for a new key.</div>
+  <div class="notes"><p class="time">~4 min</p><ul><li><b class="ask">Ask</b><span>What can you still see in picture 2? <em>Answer: The padlock and the word SECRET. Let them answer before you explain.</em></span></li><li><b class="say">Say</b><span>ECB encrypts each 4-pixel block on its own. Identical blocks, like the flat colours, give identical ciphertext, so the shapes survive.</span></li><li><b class="say">Say</b><span>CBC mixes in a random starting value, so it looks like noise.</span></li><li><b class="show">Show</b><span>Press the button for a new key: the ECB colours change, but the outline stays. This is real AES running in the browser.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 24 TAMPER -->
@@ -640,7 +640,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     </div>
     <p class="callout"><b>GCM = COUNTER-MODE ENCRYPTION + A BUILT-IN TAMPER CHECK</b> The tag is a short fingerprint of the encrypted message plus the key. Change any bit and the tag no longer matches.</p>
   </div>
-  <div class="notes">~3 min. Show how changing one bit makes the tag fail. Mallory can't read the message, but if she can guess it she can flip bits. Plain CTR accepts the forgery; GCM rejects it. Authenticated encryption = secrecy plus a tamper check.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Mallory can&#x27;t read the message, but if she can guess it, she can flip bits.</span></li><li><b class="show">Show</b><span>Left, plain CTR: she flips the bits that turn $100 into $900, and Bob decrypts &quot;Pay Bob $900&quot;. Accepted: there&#x27;s no tamper check.</span></li><li><b class="show">Show</b><span>Right, the same trick against GCM: the tag no longer matches, so the message is rejected.</span></li><li><b class="say">Say</b><span>Authenticated encryption = secrecy plus a tamper check.</span></li></ul></div>
 </section>
 
 <section class="slide" id="nonce-reuse" data-part="3" data-num="24">
@@ -664,17 +664,17 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <pre class="term" id="tamp-reuse"></pre>
     </div>
   </div>
-  <div class="notes">Connect back to the one-time pad: a key used twice. With the same key and nonce, c1 XOR c2 equals m1 XOR m2, so knowing one message reveals the other.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>GCM is counter-mode encryption plus a tag computed from the ciphertext and the key.</span></li><li><b class="show">Show</b><span>Right: two messages sent with the same key and nonce. c1 ⊕ c2 equals m1 ⊕ m2, so the secret stream cancelled out. Knowing &quot;Pay Bob $100&quot; reveals &quot;Meet at noon&quot;.</span></li><li><b class="say">Say</b><span>It&#x27;s the reused one-time pad from Part 1 all over again.</span></li><li><b class="say">Say</b><span>Use a counter for nonces so they never repeat.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 25 CHECKPOINT 3 -->
 <section class="slide slide-checkpoint" id="checkpoint-3" data-part="3" data-num="25">
-  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 3 · 5 MIN</p><h2>Pause and discuss</h2></header>
+  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 3 · 5 MIN</p><h2>Pause and discuss</h2><button type="button" class="cp-timer" title="Click to pause or resume" aria-label="5-minute discussion timer. Click to pause or resume."><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54"/><circle class="bar" cx="60" cy="60" r="54"/></svg><output>05:00</output><small>discussion</small></button></header>
   <div class="slide-body stack">
     <p class="note">Talk with a neighbour for a couple of minutes, then we share answers. Guesses are welcome: there are no wrong answers yet.</p>
     <ol class="checkpoint" data-cp="2"></ol>
   </div>
-  <div class="notes">5 min discussion. Q3 sets up the next part: key exchange.</div>
+  <div class="notes"><p class="time">5 min</p><ul><li><b class="show">Show</b><span>Pairs talk for 2 minutes, then share.</span></li><li><b class="say">Say</b><span>Q3 sets up Part 4: how two strangers can agree on a key.</span></li><li><b class="tip">Tip</b><span>Timing: Part 3 should finish around minute 80.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 26 RSA VS ECC -->
@@ -690,7 +690,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <div class="keybars" id="keybars"></div>
     </div>
   </div>
-  <div class="notes">~3 min. RSA = factoring; ECC = curve math. The chart: ECC reaches the same strength with much smaller keys.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>RSA rests on factoring a huge number. ECC rests on reversing curve maths.</span></li><li><b class="show">Show</b><span>The chart: for the same strength, ECC keys are far smaller. 256-bit ECC is about as strong as 3072-bit RSA.</span></li><li><b class="say">Say</b><span>That&#x27;s why phones and websites prefer ECC, though it&#x27;s easier to get wrong: bad curves, reused random numbers.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 27 RSA -->
@@ -716,7 +716,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </ul>
     </div>
   </div>
-  <div class="notes">~5 min. Do the numbers live: 65 → 2790 → 65. Try other primes (11 and 17, e = 7). Keep the focus on the idea: easy to compute forward, hard to reverse without the secret.</div>
+  <div class="notes"><p class="time">~4 min</p><ul><li><b class="show">Show</b><span>Walk the 4 steps: p = 61 and q = 53 give n = 3233; (p−1)(q−1) = 3120; e = 17; d = 2753, because 17 × 2753 is one more than a multiple of 3120.</span></li><li><b class="show">Show</b><span>The message 65 encrypts to 2790, and 2790 decrypts back to 65.</span></li><li><b class="say">Say</b><span>Everyone knows n and e. Finding d needs p and q, which means factoring n: easy here, hopeless for a 600-digit number.</span></li><li><b class="tip">Tip</b><span>Try other primes, like 11 and 17 with e = 7.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 28 RSA IN PRACTICE -->
@@ -744,7 +744,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <div class="card"><b>RSA-OAEP: add randomness first</b><div class="chain chain-sm"><span>message m + padding</span><i></i><span class="hot">scramble with random seed</span><i></i><span class="hot c">RSA lock (x^e mod n)</span><i></i><span>ciphertext</span></div><span>Encrypting the same message twice now gives different ciphertexts.</span></div>
     </div>
   </div>
-  <div class="notes">~3 min. Textbook RSA is unsafe: predictable, malleable, and short messages are easy to undo (run the e = 3 attack). Generating a 2048-bit key takes a second or two in plain JavaScript. Real systems use OAEP (encrypt) and PSS (sign), with 2048+ bit keys.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>&quot;Textbook&quot; RSA like that is unsafe: predictable (same input, same output), malleable (multiply ciphertexts to multiply messages), and small messages can be undone with a plain cube root.</span></li><li><b class="show">Show</b><span>Press &quot;Small-message attack&quot;: the message 1000 comes straight back, no key needed.</span></li><li><b class="tip">Tip</b><span>Optional if you have time: &quot;Generate a real 2048-bit key&quot; takes about a second.</span></li><li><b class="say">Say</b><span>Real RSA adds random padding: OAEP for encryption, PSS for signatures, with keys of 2048 bits or more.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 29 ECC -->
@@ -765,7 +765,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <p class="note" id="ecc-real-note"></p>
     </div>
   </div>
-  <div class="notes">~5 min. Move P and Q to show the line-and-flip rule. Set Q on top of P to see the tangent case, and P = mirror of Q for the "point at infinity".</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>An elliptic curve is a set of points. To add two points, draw a line through them, find where it hits the curve a third time, and flip it over the x-axis.</span></li><li><b class="show">Show</b><span>Drag P and Q. Put Q on top of P to see the tangent case.</span></li><li><b class="say">Say</b><span>You don&#x27;t need the geometry. You need the idea that points can be &quot;added&quot;.</span></li></ul></div>
 </section>
 
 <section class="slide" id="ecc-small-curve" data-part="4" data-num="29">
@@ -777,7 +777,23 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     </div>
     <pre class="term" id="ecc-toy-out"></pre>
   </div>
-  <div class="notes">Trace the toy curve points: G, 2G, 3G... Forward is easy, backward needs guessing. Alice: secret 7, public point (0, 6), as on the slide. This toy curve has only 19 points; a real curve has about 2^256.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Add G to itself again and again: G, 2G, 3G… The points jump around unpredictably.</span></li><li><b class="show">Show</b><span>Alice&#x27;s secret is 7, so her public point is 7G = (0, 6).</span></li><li><b class="say">Say</b><span>Forward is easy. Backward, an attacker must try 1G, 2G, 3G… until one matches. With 19 points that&#x27;s trivial; a real curve has about 2^256.</span></li></ul></div>
+</section>
+
+<!-- ======================================================================= 30 KEY EXCHANGE, THE IDEA -->
+<section class="slide" id="key-exchange-idea" data-part="4" data-num="30">
+  <header class="slide-head"><p class="eyebrow">// ASYMMETRIC 05 · THE IDEA</p><h2>Key exchange with paint</h2></header>
+  <div class="slide-body stack">
+    <div class="controls">
+      <label>Public starting colour <input type="color" id="paint-p" value="#f6e94b"></label>
+      <label>Alice's secret colour <input type="color" id="paint-a" value="#ff2e88"></label>
+      <label>Bob's secret colour <input type="color" id="paint-b" value="#00f0ff"></label>
+      <button type="button" class="btn btn-ghost btn-sm" id="paint-new">Random secrets</button>
+    </div>
+    <div class="paint" id="paint"></div>
+    <p class="note">Mixing paint is easy; un-mixing it is practically impossible. On a curve, the starting paint is the point G, a secret colour is a secret number, and mixing is multiplying: A = a·G. (Colours here are a simple average of the paints in each pot.)</p>
+  </div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>The classic analogy. Everyone knows the starting paint. Alice and Bob each stir in a secret colour and swap their mixtures in public.</span></li><li><b class="say">Say</b><span>Each then adds their own secret to the other&#x27;s mixture. Both pots now hold all three paints, so they&#x27;re the same colour.</span></li><li><b class="say">Say</b><span>Eve sees the starting paint and both mixtures, but you can&#x27;t un-mix paint. Mixing the two public pots puts the starting paint in twice: the wrong colour.</span></li><li><b class="tip">Tip</b><span>Let the audience pick the colours.</span></li><li><b class="say">Say</b><span>On a curve: starting paint = G, secret colour = a secret number a, mixture = a·G.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 30 ECDH -->
@@ -801,7 +817,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <div class="card card-bad"><b>Known pitfall</b><span>Reusing the random number in an ECDSA signature leaks the private key (Sony PS3 hack). Shown two slides on.</span></div>
     </div>
   </div>
-  <div class="notes">~4 min. Key exchange: Alice and Bob both reach (ab)G. Eavesdropper sees G, A, B only. Run the toy version, then the real P-256 one.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>The same idea with a curve. Alice sends A = a·G, Bob sends B = b·G.</span></li><li><b class="show">Show</b><span>Press &quot;New toy secrets&quot;: both compute the same point, (ab)·G.</span></li><li><b class="show">Show</b><span>Press &quot;Run it on NIST P-256&quot;: the real curve with 256-bit secrets agrees too, in milliseconds.</span></li><li><b class="say">Say</b><span>Use fresh keys each time (ECDHE), so a later leak can&#x27;t unlock old messages.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 31 SIGNATURES -->
@@ -824,7 +840,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <div><b>Used for</b><span>Software updates, website certificates, Git commits, signed PDFs.</span></div>
     </div>
   </div>
-  <div class="notes">~5 min. Connect back to hashing: sign the hash, not the whole message. Ask who can verify and who can create a signature. Edit what Bob receives to show VALID vs REJECTED.</div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>A signature proves who sent a message. Alice hashes it and signs the hash with her private key.</span></li><li><b class="say">Say</b><span>Bob hashes what he received, opens the signature with Alice&#x27;s public key, and compares the two hashes.</span></li><li><b class="show">Show</b><span>&quot;Pay Bob $100&quot; is valid; &quot;Pay Bob $900&quot; is rejected. Edit Bob&#x27;s message to try others.</span></li><li><b class="ask">Ask</b><span>Who can check a signature, and who can create one? <em>Answer: Anyone can check; only the private-key holder can create one.</em></span></li></ul></div>
 </section>
 
 <section class="slide" id="ecdsa" data-part="4" data-num="31">
@@ -837,17 +853,17 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     </div>
     <pre class="term term-big" id="ecdsa-out"></pre>
   </div>
-  <div class="notes">Press the first button: both signatures share r, and the attacker recovers the private key. Press the second: fresh k values keep the key safe.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>ECDSA needs a fresh random number k for every signature. Sony reused one on the PS3.</span></li><li><b class="show">Show</b><span>Press the first button: both signatures share the same r, and simple algebra recovers the private key.</span></li><li><b class="show">Show</b><span>Press the second button: fresh k values, and the key stays safe.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 32 CHECKPOINT 4 -->
 <section class="slide slide-checkpoint" id="checkpoint-4" data-part="4" data-num="32">
-  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 4 · 5 MIN</p><h2>Pause and discuss</h2></header>
+  <header class="slide-head"><p class="eyebrow">// CHECKPOINT 4 · 5 MIN</p><h2>Pause and discuss</h2><button type="button" class="cp-timer" title="Click to pause or resume" aria-label="5-minute discussion timer. Click to pause or resume."><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54"/><circle class="bar" cx="60" cy="60" r="54"/></svg><output>05:00</output><small>discussion</small></button></header>
   <div class="slide-body stack">
     <p class="note">Talk with a neighbour for a couple of minutes, then we share answers. Guesses are welcome: there are no wrong answers yet.</p>
     <ol class="checkpoint" data-cp="3"></ol>
   </div>
-  <div class="notes">5 min discussion. Q3 is the preview of the website walkthrough, which pulls it all together.</div>
+  <div class="notes"><p class="time">5 min</p><ul><li><b class="show">Show</b><span>Pairs talk for 2 minutes, then share.</span></li><li><b class="say">Say</b><span>Q3 previews the secure-website walkthrough coming up.</span></li><li><b class="tip">Tip</b><span>Timing: Part 4 should finish around minute 105.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 33 POST-QUANTUM -->
@@ -876,7 +892,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </div>
     </div>
   </div>
-  <div class="notes">~4 min. Shor breaks RSA and ECC; Grover only halves symmetric strength. "Harvest now, decrypt later" is why migration starts now.</div>
+  <div class="notes"><p class="time">~4 min</p><ul><li><b class="say">Say</b><span>A large quantum computer could run Shor&#x27;s algorithm, which breaks RSA and ECC.</span></li><li><b class="say">Say</b><span>Symmetric crypto survives: Grover&#x27;s algorithm only halves key strength, so use AES-256.</span></li><li><b class="say">Say</b><span>&quot;Harvest now, decrypt later&quot;: traffic recorded today could be decrypted years from now. That&#x27;s why the switch is already happening.</span></li><li><b class="say">Say</b><span>NIST&#x27;s new standards: ML-KEM for key exchange, ML-DSA and SLH-DSA for signatures. Browsers already pair X25519 with ML-KEM.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 34 LATTICES -->
@@ -896,7 +912,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       </div>
     </div>
   </div>
-  <div class="notes">~3 min. Keep it light: lattices and noisy equations. Click the lattice to move the target. Noise turns an easy puzzle into a hard one.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Lattice crypto is built on a regular grid of points.</span></li><li><b class="show">Show</b><span>Click the grid to move the target. Finding the nearest point is easy in 2D.</span></li><li><b class="say">Say</b><span>In hundreds of dimensions it&#x27;s hopeless, even for a quantum computer.</span></li><li><b class="show">Show</b><span>Right: two equations are easy to solve. Add a little noise and the clean answer disappears. That&#x27;s &quot;learning with errors&quot;.</span></li></ul></div>
 </section>
 
 <section class="slide" id="lattice-encryption" data-part="5" data-num="34">
@@ -913,7 +929,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <div class="card card-bad"><b>Newer math</b><span>The SIKE scheme was broken on a laptop in 2022, so hybrids (classic + post-quantum together) are used.</span></div>
     </div>
   </div>
-  <div class="notes">ML-KEM builds its keys from this noisy-equations puzzle (LWE: Learning With Errors). Type bits to show each decrypts correctly.</div>
+  <div class="notes"><p class="time">~1 min</p><ul><li><b class="say">Say</b><span>ML-KEM&#x27;s core idea in miniature: a 1 is hidden by adding half the modulus, plus some noise.</span></li><li><b class="show">Show</b><span>Type some bits. The receiver&#x27;s secret strips almost everything away, leaving a number near 0 (a 0) or near 48 (a 1).</span></li><li><b class="say">Say</b><span>Cost: bigger keys, 1,184 bytes vs 32 for X25519. The maths is newer (SIKE was broken in 2022), so it&#x27;s used alongside today&#x27;s methods.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 35 WEBSITE -->
@@ -934,7 +950,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     </ol>
     <p class="note" id="web-done">Every idea from today shows up in a single page load. Press the button to run the real steps, with toy-sized keys.</p>
   </div>
-  <div class="notes">~4 min. Walk the five steps, then press the button to run them for real. Ask students to point out which earlier slide each step came from.</div>
+  <div class="notes"><p class="time">~4 min</p><ul><li><b class="say">Say</b><span>Every idea from today, in one page load.</span></li><li><b class="say">Say</b><span>Walk the five steps: a certificate (signatures), a key exchange (asymmetric), encrypting the data (symmetric), tags (integrity), and logging in (hashing).</span></li><li><b class="show">Show</b><span>Press &quot;Load the page&quot;. Each step runs for real with small keys. Step 5 stores your password as an Argon2id hash, then checks a right and a wrong password.</span></li><li><b class="ask">Ask</b><span>Which part of today does each step come from? <em>Answer: Signatures and key exchange: Part 4. Encryption and tags: Part 3. Password hashing: Part 2.</em></span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 36 TAKEAWAYS -->
@@ -948,7 +964,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     <div><b>Built on hard puzzles</b><span>RSA, ECC and post-quantum schemes each rest on a puzzle that is easy one way and hopeless to reverse.</span></div>
     <div><b>Plan for quantum</b><span>List where you use crypto, be ready to swap it, try hybrid ML-KEM, and prefer AES-256.</span></div>
   </div>
-  <div class="notes">~2 min. Quick recap. Ask each table to name one takeaway they will remember.</div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Read the six cards quickly.</span></li><li><b class="ask">Ask</b><span>Have each table name the one takeaway they&#x27;ll remember. <em>Answer: Any of the six.</em></span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 37 QUESTIONS -->
@@ -958,7 +974,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     <div class="stack">
       <p class="glitch big-q" data-text="Questions?">Questions?</p>
       <p class="lede">Anything from today, or anything you were too shy to ask earlier. Ask for a slide to be revisited, or a demo to be run again.</p>
-      <p class="note">Every demo stays live on this page: share the link.</p>
+      <div class="follow follow-big"><img src="qr.svg" alt="QR code linking to zevaryx.github.io/crypto-101" width="150" height="150"><p>Every demo stays live after the talk. Scan to keep the link:<br><a href="https://zevaryx.github.io/crypto-101/">zevaryx.github.io/crypto-101</a></p></div>
     </div>
     <div class="stack">
       <h3>Keep exploring</h3>
@@ -971,7 +987,35 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
       <p class="fine">Educational only: the ciphers here are written from scratch to show each step. Real software should use the Web Crypto API or a vetted library. Everything runs in your browser; nothing you type is sent anywhere. Password-hash timings use <a href="https://github.com/Daninet/hash-wasm" target="_blank" rel="noopener">hash-wasm</a> (MIT).</p>
     </div>
   </div>
-  <div class="notes">~2+ min, extend if time allows. Open floor. Share the resource list for further learning.</div>
+  <div class="notes"><p class="time">~2 min or more</p><ul><li><b class="say">Say</b><span>Open the floor. Anything from today, or anything they were too shy to ask earlier.</span></li><li><b class="tip">Tip</b><span>Press O to jump to any slide, or rerun a demo on request.</span></li><li><b class="say">Say</b><span>Point at the QR code: the deck stays online with every demo. The resources on the right go further.</span></li></ul></div>
+</section>
+
+<!-- ======================================================================= APPENDIX GLOSSARY -->
+<section class="slide" id="glossary" data-part="0" data-num="A1" data-label="APPENDIX">
+  <header class="slide-head"><p class="eyebrow">// APPENDIX</p><h2>Glossary</h2></header>
+  <div class="slide-body">
+    <dl class="glossary">
+      <div><dt>Plaintext / ciphertext</dt><dd>The readable message, and its scrambled form.</dd></div>
+      <div><dt>Key</dt><dd>The secret that locks and unlocks. Its length sets how hard it is to guess.</dd></div>
+      <div><dt>Cipher</dt><dd>The recipe for encrypting (AES, RSA). It can be public; only the key is secret.</dd></div>
+      <div><dt>Hash</dt><dd>A fixed-size, one-way fingerprint of any data (SHA-256).</dd></div>
+      <div><dt>Salt</dt><dd>A random value stored with each password hash, so equal passwords get different hashes.</dd></div>
+      <div><dt>Pepper</dt><dd>One secret value mixed into every password hash, kept outside the database.</dd></div>
+      <div><dt>Nonce</dt><dd>A "number used once" that goes with each message. Never repeat one with the same key.</dd></div>
+      <div><dt>IV</dt><dd>Initialisation vector: a random starting value, for example in CBC mode.</dd></div>
+      <div><dt>Mode of operation</dt><dd>How a block cipher handles messages longer than one block: ECB, CBC, CTR, GCM.</dd></div>
+      <div><dt>Tag (MAC)</dt><dd>A short checksum made with the key. If the message changes, the tag no longer matches.</dd></div>
+      <div><dt>Authenticated encryption</dt><dd>Encryption plus a built-in tamper check, like AES-GCM.</dd></div>
+      <div><dt>Public / private key</dt><dd>A key pair. Share the public one freely; the private one never leaves you.</dd></div>
+      <div><dt>Key exchange</dt><dd>Two people agree on a shared secret over a public channel (ECDH).</dd></div>
+      <div><dt>Digital signature</dt><dd>Proof made with a private key that anyone can check with the public key.</dd></div>
+      <div><dt>Certificate</dt><dd>A public key plus a name, signed by an authority your browser trusts.</dd></div>
+      <div><dt>Collision</dt><dd>Two different inputs that give the same hash.</dd></div>
+      <div><dt>Brute force</dt><dd>Trying every possible key or password until one works.</dd></div>
+      <div><dt>Post-quantum</dt><dd>Schemes built to resist large quantum computers, like ML-KEM and ML-DSA.</dd></div>
+    </dl>
+  </div>
+  <div class="notes"><p class="time">Appendix</p><ul><li><b class="tip">Tip</b><span>Not part of the timed talk. It&#x27;s for people reading later, or for when someone asks &quot;what&#x27;s a nonce again?&quot;</span></li></ul></div>
 </section>
 
 </div>
@@ -988,9 +1032,10 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
   <button type="button" id="ui-notes" title="Speaker notes (N)">Notes</button>
   <button type="button" id="ui-presenter" title="Presenter window (P)">Presenter</button>
   <button type="button" id="ui-full" title="Full screen (F)">Full screen</button>
+  <button type="button" id="ui-print" title="Print or save as PDF, one slide per page">PDF</button>
   <button type="button" data-mode="scroll" title="Read as one long page">Scroll view</button>
 </nav>
-<aside class="notes-panel" id="notes-panel" hidden aria-label="Speaker notes"><b id="notes-title"></b><p id="notes-text"></p></aside>
+<aside class="notes-panel" id="notes-panel" hidden aria-label="Speaker notes"><b id="notes-title"></b><div id="notes-text" class="cue"></div></aside>
 <div class="overview" id="overview" hidden role="dialog" aria-label="All slides"><div class="overview-in"><header><b>All slides</b><button type="button" id="overview-close" class="btn btn-ghost btn-sm">Close</button></header><ol id="overview-list"></ol></div></div>
 <div class="presenter" id="presenter" hidden></div>
 

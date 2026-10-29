@@ -214,26 +214,58 @@
   }
 
   // --------------------------------------------------------------------------- checkpoints (slides 9, 16, 25, 32)
+  // [question, hint, answer]: answers stay folded away so the room can discuss first
   const CHECKPOINTS = [
-    [["Name something you did today that used cryptography. Which of the four goals did it need?", "Logging in, messaging, paying, streaming."],
-      ["Why might a website prefer to hash your password instead of encrypting it?", "Who would hold the key if it were encrypted?"],
-      ["A Caesar cipher has 25 keys. Roughly how many keys would make guessing hopeless?", "How many guesses can a computer make per second?"]],
-    [["Two users have the same unsalted password hash. What does an attacker learn?", "Cracking one hash cracks both, and rainbow tables work."],
-      ["Why is a slow hash good for storing passwords, but bad for checking a big file download?", "Count the hashes an attacker needs versus an honest user."],
-      ["Your database leaks, but the pepper stays safe in a vault. What is still protected?", "The attacker has the salts and hashes, but not one ingredient."]],
-    [["In the padlock picture, why did the outline survive ECB encryption?", "What happens to blocks that hold identical data?"],
-      ["What could go wrong if you reuse a nonce with the same key?", "Think back to the one-time pad: a key used twice."],
-      ["AES needs both sides to share a secret key. How could two strangers agree on one safely?", "This puzzle leads into the next part."]],
-    [["Why do real systems use RSA or ECC to share a key, then AES for the data?", "Compare speed and key sharing in the earlier table."],
-      ["Alice signs with her private key. Why can anyone check it, but nobody forge it?", "Who has the private key? Who has the public key?"],
-      ["Your browser connects to a bank. What can an eavesdropper see, and what stays secret?", "Think about ECDH: what is public, what is private?"]],
+    [["Name something you did today that used cryptography. Which of the four goals did it need?", "Logging in, messaging, paying, streaming.",
+      "Any https:// page needs confidentiality, integrity and authentication. Logging in adds authentication of you; paying online needs all four, including non-repudiation."],
+      ["Why might a website prefer to hash your password instead of encrypting it?", "Who would hold the key if it were encrypted?",
+        "If passwords were encrypted, the site would hold the key, so a thief with the database and the key gets every password. A hash lets the site check a password without ever being able to recover it."],
+      ["A Caesar cipher has 25 keys. Roughly how many keys would make guessing hopeless?", "How many guesses can a computer make per second?",
+        "Computers try billions of keys per second, so you need numbers far beyond that: modern keys have 128 to 256 bits. 2^128 is about 3.4 × 10^38 keys."]],
+    [["Two users have the same unsalted password hash. What does an attacker learn?", "Cracking one hash cracks both, and rainbow tables work.",
+      "That they chose the same password. Cracking one cracks both, and if it is a common password a pre-computed table reveals it straight away."],
+      ["Why is a slow hash good for storing passwords, but bad for checking a big file download?", "Count the hashes an attacker needs versus an honest user.",
+        "An honest user hashes once per login, but an attacker must hash once per guess, billions of times, so slowness hurts only the attacker. A file check has no guessing to slow down, so it should be fast."],
+      ["Your database leaks, but the pepper stays safe in a vault. What is still protected?", "The attacker has the salts and hashes, but not one ingredient.",
+        "The passwords. Without the pepper the attacker cannot even test a guess against the stored hashes."]],
+    [["In the padlock picture, why did the outline survive ECB encryption?", "What happens to blocks that hold identical data?",
+      "ECB encrypts every 16-byte block on its own with the same key, so identical blocks (the flat colours) give identical ciphertext and the shapes stay visible."],
+      ["What could go wrong if you reuse a nonce with the same key?", "Think back to the one-time pad: a key used twice.",
+        "The scrambled stream repeats, so combining two ciphertexts cancels it out and leaks the messages, just like a reused one-time pad. With GCM it also lets attackers forge tags."],
+      ["AES needs both sides to share a secret key. How could two strangers agree on one safely?", "This puzzle leads into the next part.",
+        "With asymmetric cryptography: a key exchange such as ECDH, or by locking the key with the other person's public key."]],
+    [["Why do real systems use RSA or ECC to share a key, then AES for the data?", "Compare speed and key sharing in the earlier table.",
+      "Asymmetric crypto solves sharing a key with a stranger but is slow; AES is fast but needs a shared key. Use each for what it does best. That is exactly what TLS does."],
+      ["Alice signs with her private key. Why can anyone check it, but nobody forge it?", "Who has the private key? Who has the public key?",
+        "Checking needs only the public key, which everyone has. Making a signature needs the private key, and working it out from the public key is the hard puzzle (factoring or curve maths)."],
+      ["Your browser connects to a bank. What can an eavesdropper see, and what stays secret?", "Think about ECDH: what is public, what is private?",
+        "They see which site you contact, its certificate, the public key-exchange values, and the size and timing of the traffic. The shared key, the pages, your cookies and your password stay secret."]],
   ];
   function checkpoints() {
     document.querySelectorAll(".checkpoint[data-cp]").forEach((el) => {
-      el.innerHTML = CHECKPOINTS[+el.dataset.cp].map(([qq, hint]) =>
-        `<li><p>${esc(qq)}</p><details><summary>Hint</summary><p>${esc(hint)}</p></details></li>`).join("");
+      el.innerHTML = CHECKPOINTS[+el.dataset.cp].map(([qq, hint, answer]) =>
+        `<li><p>${esc(qq)}</p><details><summary>Hint</summary><p>${esc(hint)}</p></details>` +
+        `<details class="answer"><summary>Answer</summary><p>${esc(answer)}</p></details></li>`).join("");
     });
   }
+
+  // --------------------------------------------------------------------------- key exchange with paint (slide 30)
+  // a pot of paint is a list of pigments; its colour is their average
+  const hexRgb = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const mix = (...pots) => { const all = pots.flat(); return [0, 1, 2].map((c) => Math.round(all.reduce((s, p) => s + p[c], 0) / all.length)); };
+  const swatch = (rgb, label, cls = "") => `<figure class="swatch ${cls}"><i style="background:rgb(${rgb.join(",")})"></i><figcaption>${label}</figcaption></figure>`;
+  function paint() {
+    const P = [hexRgb($("paint-p").value)], a = [hexRgb($("paint-a").value)], b = [hexRgb($("paint-b").value)];
+    const A = [...P, ...a], B = [...P, ...b];
+    const sa = mix(B, a), sb = mix(A, b), eve = mix(A, B);
+    const same = sa.every((v, i) => v === sb[i]);
+    $("paint").innerHTML =
+      `<div class="paint-col"><b>Alice</b>${swatch(mix(a), "1 · her secret colour")}${swatch(mix(A), "2 · mixes it into the starting paint: A")}${swatch(sa, "3 · adds her secret to Bob's pot", "final")}</div>` +
+      `<div class="paint-col wire"><b>Public · Eve sees all of this</b>${swatch(mix(P), "starting paint")}<div class="pair">${swatch(mix(A), "A")}${swatch(mix(B), "B")}</div>${swatch(eve, "Eve mixes A + B: wrong colour", "eve")}</div>` +
+      `<div class="paint-col"><b>Bob</b>${swatch(mix(b), "1 · his secret colour")}${swatch(mix(B), "2 · mixes it into the starting paint: B")}${swatch(sb, "3 · adds his secret to Alice's pot", "final")}</div>` +
+      `<p class="paint-verdict">${same ? '<span class="ok">Alice and Bob end up with the same colour.</span>' : ""} Eve's pot has the starting paint in it twice, so it never matches.</p>`;
+  }
+  const randHex = () => "#" + Array.from(L.randBytes(3), (x) => x.toString(16).padStart(2, "0")).join("");
 
   // --------------------------------------------------------------------------- avalanche (slide 10)
   function bitGrid(el, a, b) { el.innerHTML = L.bits(L.xor(a, b)).split("").map((x) => `<i class="${x === "1" ? "on" : ""}"></i>`).join(""); }
@@ -790,6 +822,8 @@
     click("rsa-gen", (e) => busy(e.currentTarget, rsaGenerate));
     bind(["ecc-px", "ecc-qx", "ecc-pneg", "ecc-qneg"], eccReal);
     bind("ecc-secret", eccToy);
+    bind(["paint-p", "paint-a", "paint-b"], paint);
+    click("paint-new", () => { $("paint-a").value = randHex(); $("paint-b").value = randHex(); paint(); });
     ecdhToy(); click("ecdh-toy", ecdhToy);
     click("ecdh-real", (e) => busy(e.currentTarget, ecdhReal));
     bind(["sig-msg", "sig-recv"], signatures);
