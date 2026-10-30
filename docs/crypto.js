@@ -392,6 +392,29 @@
   }
   const hashInt = (s) => toBig(sha256(utf8(s)));
 
+  // --- passkeys (WebAuthn): check a real ES256 login signature with the P-256 code above
+  function derSig(der) {                               // SEQUENCE { INTEGER r, INTEGER s }
+    if (der[0] !== 0x30) throw new Error("not a DER signature");
+    let i = der[1] & 0x80 ? 2 + (der[1] & 0x7f) : 2;
+    const int = () => {
+      if (der[i++] !== 0x02) throw new Error("not a DER signature");
+      const len = der[i++], v = toBig(der.subarray(i, i + len));
+      i += len;
+      return v;
+    };
+    return [int(), int()];
+  }
+  function spkiP256(spki) {                            // the last 65 bytes of a P-256 public key: 04 || x || y
+    const p = spki.subarray(spki.length - 65);
+    if (p[0] !== 0x04) throw new Error("not an uncompressed P-256 key");
+    return [toBig(p.subarray(1, 33)), toBig(p.subarray(33))];
+  }
+  /** WebAuthn signs authenticatorData || SHA-256(clientDataJSON). */
+  function verifyPasskey(spki, authData, clientDataJSON, der) {
+    const h = toBig(sha256(concat(authData, sha256(clientDataJSON))));
+    return ecdsaVerify(spkiP256(spki), h, derSig(der));
+  }
+
   // --------------------------------------------------------------------------- PART 5: toy lattice encryption (Regev / LWE)
   function regevKeygen(q = 97, n = 6, m = 16) {
     const s = Array.from({ length: n }, () => randInt(q));
@@ -418,6 +441,7 @@
     sha256, sha256Pad, hmacSha256,
     SBOX, expandKey, subBytes, shiftRows, mixColumns, addKey, aesBlock, pad, aesEcb, aesCbc, ctrCrypt, gcmEncrypt, gcmDecrypt, toBig, fromBig,
     modPow, gcd, modInv, randBits, randBelow, isPrime, genPrime, rsaKeygen, iroot, Curve, TOY, P256, ecdsaSign, ecdsaVerify, hashInt,
+    derSig, spkiP256, verifyPasskey,
     regevKeygen, regevEncrypt, regevDecrypt,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = root.Lab;

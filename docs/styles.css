@@ -655,3 +655,10 @@ input[type="color"] { width: 72px; height: 40px; padding: 2px; background: var(-
 .pr-cp.low, .pr-cp.done { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 16px var(--pink-glow); }
 .pr-cp.low output { animation: cp-throb 1s ease-in-out infinite; }
 .pr-cp.done output { animation: cp-blink .5s steps(1) infinite; }
+
+/* encoding chain colour, skippable marker, roomier glossary */
+.chain > span.hot.y { border-color: var(--yellow); color: var(--yellow); box-shadow: 0 0 12px rgba(246, 233, 75, .18); }
+.overview li button em.skip { font: normal 11px var(--mono); color: var(--yellow); letter-spacing: .1em; text-transform: uppercase; }
+.mode-slides .glossary, .mode-scroll .glossary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 900px) { .mode-scroll .glossary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .mode-scroll .glossary { grid-template-columns: minmax(0, 1fr); } }

@@ -6,10 +6,10 @@ A two-hour beginner's talk on cryptography, built as a website. The slides and t
 
 The talk covers five parts, with a five-minute discussion checkpoint after each:
 
-1. **Foundations** (25 min): the four goals of cryptography, Caesar and Vigenère ciphers, the one-time pad, the Enigma machine, hashing vs encryption
+1. **Foundations** (25 min): the four goals of cryptography, Caesar and Vigenère ciphers, the one-time pad, the Enigma machine, bits, bytes, hex and Base64, hashing vs encryption vs encoding
 2. **Hashing** (20 min): the avalanche effect, SHA-256 round by round, why MD5 and SHA-1 broke, salt and pepper, slow password hashing
 3. **Symmetric encryption** (35 min): XOR, AES step by step, modes from ECB to GCM, the ECB padlock picture, tampering and nonce reuse
-4. **Asymmetric** (25 min): RSA with small numbers, elliptic curves, key exchange (with paint, then on P-256), digital signatures
+4. **Asymmetric** (25 min): RSA with small numbers, elliptic curves, key exchange (with paint, then on P-256), digital signatures, passkeys (simulated, plus an optional real one)
 5. **The future and wrap-up** (15 min): post-quantum cryptography and lattices, a secure website from start to finish, takeaways
 
 ## Presenting
@@ -29,7 +29,9 @@ Open the site on a laptop or projector and it shows one slide at a time. On a ph
 
 Each checkpoint slide has a 5-minute discussion timer. It starts by itself when the slide appears and resets when you leave; click it to pause or resume. The speaker notes are short cues (Say, Show, Ask, Tip, Next) with a time estimate per slide.
 
-The control bar in the bottom-right corner has the same actions, plus **Scroll view** and **PDF** (print, or save as a PDF with one slide per page). Every slide has its own link, for example `#padlock` or `#ecdh`.
+The control bar in the bottom-right corner has the same actions, plus **Scroll view** and **PDF** (print, or save as a PDF with one slide per page). Every slide has its own link, for example `#padlock` or `#ecdh`. Three slides are marked skippable in the notes, presenter window and overview, for when you're running long.
+
+The passkeys slide can create a real passkey through your browser (fingerprint, face or PIN); it's saved as "Crypto 101 demo" in your password manager.
 
 The site needs no internet connection once loaded: fonts and libraries are bundled.
 
@@ -55,7 +57,8 @@ docs/
   styles.css    the theme, slide layout, scroll view and print layout
   deck.js       slide navigation, notes, overview, presenter window
   app.js        the live demos
-  crypto.js     the maths: classical ciphers, SHA-256, AES (ECB/CBC/CTR/GCM), RSA, elliptic curves, toy lattice encryption
+  crypto.js     the maths: classical ciphers, SHA-256, AES (ECB/CBC/CTR/GCM), RSA, elliptic curves, passkey
+                signature checks, toy lattice encryption
   qr.svg        QR code linking to the live deck
   fonts/        bundled fonts (Chakra Petch, JetBrains Mono)
   vendor/       hash-wasm, used to time bcrypt, scrypt and Argon2id

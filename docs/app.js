@@ -209,8 +209,143 @@
     $("hve-out").innerHTML =
       `input      ${esc(q(s))}  ${sp("m", `${b.length} bytes`)}\n\n` +
       `${sp("c", "SHA-256")}    ${L.hex(h)}\n           ${sp("m", "always 32 bytes · no key · no way back")}\n\n` +
-      `${sp("k", "AES-GCM")}    ${esc(cut(L.hex(ct), 64)) || sp("m", "(empty)")}\n           ${sp("m", `${ct.length} bytes (same as the input) + a 16-byte tag · key ${L.hex(hveKey).slice(0, 8)}… is secret`)}\n` +
-      `decrypt    ${esc(q(L.text(L.gcmDecrypt(hveKey, hveNonce, ct, tag))))}  ${sp("ok", "the right key gets it back")}`;
+      `${sp("k", "AES-GCM")}    ${esc(cut(L.hex(ct), 64)) || sp("m", "(empty)")}\n           ${sp("m", "same length as the input, plus a 16-byte tag")}\n` +
+      `decrypt    ${esc(q(L.text(L.gcmDecrypt(hveKey, hveNonce, ct, tag))))}  ${sp("ok", "the secret key gets it back")}`;
+  }
+
+  // --------------------------------------------------------------------------- encoding: bytes, hex, Base64 (Part 1)
+  const toB64 = (bytes) => btoa(Array.from(bytes, (b) => String.fromCharCode(b)).join(""));
+  const fromB64 = (s) => Uint8Array.from(atob(s.replace(/\s+/g, "")), (c) => c.charCodeAt(0));
+  const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  function encoding() {
+    const s = $("enc-in").value, b = enc(s), chars = [...s].length;
+    if (!b.length) { $("enc-out").innerHTML = sp("m", "Type some text."); }
+    else {
+      const first = b.subarray(0, 3), bits24 = L.bits(first).padEnd(24, "0"), groups = bits24.match(/.{6}/g).slice(0, Math.ceil(first.length * 8 / 6));
+      $("enc-out").innerHTML =
+        `text     ${esc(q(s))}  ${sp("m", `${chars} character${chars === 1 ? "" : "s"}`)}\n` +
+        `UTF-8    ${esc(cut(L.hex(b, " "), 60))}  ${sp("m", `${b.length} bytes${b.length > chars ? " (some characters need more than one)" : ""}`)}\n` +
+        `binary   ${esc(cut(Array.from(b.subarray(0, 4), (x) => x.toString(2).padStart(8, "0")).join(" "), 60))}${b.length > 4 ? "…" : ""}\n` +
+        `hex      ${sp("y", cut(L.hex(b), 60))}  ${sp("m", "2 characters per byte")}\n` +
+        `Base64   ${sp("c", cut(toB64(b), 60))}  ${sp("m", "4 characters per 3 bytes")}\n\n` +
+        `${sp("m", "How Base64 works: the first bytes")} ${esc(L.hex(first, " "))} ${sp("m", "are")} ${bits24.slice(0, first.length * 8).match(/.{8}/g).join(" ")}\n` +
+        `${sp("m", "regrouped into 6-bit pieces")} ${groups.join(" ")} ${sp("m", "→")} ${sp("c", groups.map((g) => B64[parseInt(g, 2)]).join(" "))}`;
+    }
+    let decoded;
+    try { decoded = sp("ok", q(L.text(fromB64($("enc-b64").value)))); } catch (e) { decoded = sp("bad", "not valid Base64"); }
+    $("enc-dec").innerHTML = `decoded  ${decoded}\n${sp("m", "No key, no secret: anyone can do this. Encoding only changes how data is written down.")}`;
+  }
+
+  // --------------------------------------------------------------------------- passkeys (Part 4), simulated with P-256 ECDSA
+  // Simplified from WebAuthn: the device signs SHA-256(origin + challenge). Real passkeys sign a little more, the same way.
+  const PK_SITE = "https://bank.example", PK_FAKE = "https://bank-examp1e.com";
+  let pkDevice = null, pkServer = null;
+  const pkHash = (origin, challenge) => L.toBig(L.sha256(L.concat(enc(origin), challenge)));
+  const pkVerify = (sig, challenge) => L.ecdsaVerify(pkServer, pkHash(PK_SITE, challenge), sig);
+  const pkSign = (origin, challenge) => L.ecdsaSign(pkDevice.d, pkHash(origin, challenge), L.randBelow(L.P256.n - 1n) + 1n);
+  const short64 = (x) => cut(hex64(x), 20);
+  function passkey(action) {
+    const out = $("pk-out");
+    if (action === "register") {
+      const d = L.randBelow(L.P256.n - 1n) + 1n;
+      pkDevice = { site: PK_SITE, d }; pkServer = L.P256.mul(d);
+      out.innerHTML = `${sp("c", "Your device")} makes a new key pair just for ${PK_SITE}\n  private key  ${sp("k", "stays on the device, never sent")}\n` +
+        `${sp("y", "bank.example")} stores only the public key\n  Q.x = ${short64(pkServer[0])}\n\n` +
+        `${sp("m", "If the bank's database leaks, attackers get public keys: they can check signatures, not make them.")}`;
+      return;
+    }
+    if (!pkDevice) { out.innerHTML = sp("m", "Create a passkey first (button 1)."); return; }
+    const challenge = L.randBytes(16), t0 = performance.now();
+    if (action === "login") {
+      const sig = pkSign(PK_SITE, challenge), ok = pkVerify(sig, challenge);
+      out.innerHTML = `${sp("y", "bank.example")} sends a random challenge  ${L.hex(challenge)}\n` +
+        `${sp("c", "your device")} signs (origin + challenge) with the private key\n  r = ${short64(sig[0])}  s = ${short64(sig[1])}\n` +
+        `${sp("y", "bank.example")} checks it with your public key: ${ok ? sp("ok", "valid, you're logged in") : sp("bad", "invalid")}  ${sp("m", `(${ago(t0)})`)}\n\n` +
+        `${sp("m", "No password was sent or stored. A fresh challenge every time means an old signature can't be replayed.")}`;
+      return;
+    }
+    // phishing: the look-alike site relays the real bank's challenge and hopes for a usable signature
+    const forced = pkSign(PK_FAKE, challenge), ok = pkVerify(forced, challenge);
+    out.innerHTML = `${sp("bad", "bank-examp1e.com")} (a look-alike) relays the bank's challenge  ${L.hex(challenge)}\n\n` +
+      `${sp("c", "your device")} looks for a passkey for bank-examp1e.com: ${sp("ok", "none, so nothing is signed")}\n\n` +
+      `even if it were tricked, the browser puts the real origin into what gets signed:\n  signed for ${PK_FAKE}\n` +
+      `${sp("y", "bank.example")} checks it expecting ${PK_SITE}: ${ok ? sp("bad", "accepted?!") : sp("ok", "doesn't match, rejected")}\n\n` +
+      `${sp("m", "A password typed into the fake site would have worked for the attacker. A passkey can't be phished.")}`;
+  }
+
+  // --------------------------------------------------------------------------- a real passkey, through the browser's WebAuthn API
+  // First press creates one; later presses log in with it (or any passkey you already have for this site).
+  const PK_STORE = "crypto101-passkey";
+  const b64u = (bytes) => toB64(bytes).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  const pkLoad = () => { try { return JSON.parse(localStorage.getItem(PK_STORE)); } catch (e) { return null; } };
+  const pkSave = (v) => { try { if (v) localStorage.setItem(PK_STORE, JSON.stringify(v)); else localStorage.removeItem(PK_STORE); } catch (e) { /* storage blocked */ } };
+  const ALGS = { "-7": "ES256: ECDSA on P-256, the curve from this talk", "-8": "EdDSA (Ed25519)", "-257": "RS256: RSA signatures" };
+  const flagsText = (f) => (f & 0x08 ? (f & 0x10 ? "synced: backed up to your password manager" : "can sync, not backed up yet") : "device-bound: lives only on this authenticator");
+  function pkRealLabel() {
+    const has = !!pkLoad();
+    $("pk-real").textContent = has ? "Use my real passkey" : "Create a real passkey";
+    $("pk-forget").hidden = !has;
+  }
+  async function pkCreate(out) {
+    const cred = await navigator.credentials.create({ publicKey: {
+      challenge: L.randBytes(32), rp: { name: "Crypto 101 Lab" },
+      user: { id: enc("crypto101-demo"), name: "crypto101-demo", displayName: "Crypto 101 demo" },
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+      authenticatorSelection: { residentKey: "required", userVerification: "preferred" }, attestation: "none", timeout: 120000 } });
+    const r = cred.response, spki = r.getPublicKey ? r.getPublicKey() : null, alg = r.getPublicKeyAlgorithm ? r.getPublicKeyAlgorithm() : null;
+    const auth = r.getAuthenticatorData ? new Uint8Array(r.getAuthenticatorData()) : null, id = b64u(new Uint8Array(cred.rawId));
+    pkSave({ id, spki: spki ? toB64(new Uint8Array(spki)) : null, alg, made: new Date().toISOString().slice(0, 10) });
+    let pt = null;
+    try { if (spki && alg === -7) pt = L.spkiP256(new Uint8Array(spki)); } catch (e) { /* show the raw key instead */ }
+    const where = { platform: "on this device", "cross-platform": "on a phone or security key" }[cred.authenticatorAttachment] || "by your authenticator";
+    out.innerHTML = `${sp("ok", "REAL PASSKEY CREATED")} for ${esc(location.hostname)}\n\n` +
+      `credential ID  ${esc(cut(id, 32))}\n` +
+      `algorithm      ${esc(ALGS[alg] || (alg === null ? "not reported by this browser" : "COSE " + alg))}\n` +
+      (pt ? `public key     x = ${cut(hex64(pt[0]), 24)}\n               y = ${cut(hex64(pt[1]), 24)}  ${sp("m", "← all the site keeps")}\n`
+        : spki ? `public key     ${cut(L.hex(new Uint8Array(spki)), 40)}  ${sp("m", "← all the site keeps")}\n` : "") +
+      `stored         ${esc(where)}${auth ? `, ${esc(flagsText(auth[32]))}` : ""}\n` +
+      `private key    ${sp("k", "never leaves the authenticator")}\n\n` +
+      sp("m", 'Press the button again to log in with it. It is saved as "Crypto 101 demo" in your password manager; delete it there any time.');
+  }
+  async function pkUse(out, stored) {
+    const challenge = L.randBytes(32);
+    const cred = await navigator.credentials.get({ publicKey: { challenge, allowCredentials: [], userVerification: "preferred", timeout: 120000 } });
+    const r = cred.response, auth = new Uint8Array(r.authenticatorData), cdj = new Uint8Array(r.clientDataJSON), sig = new Uint8Array(r.signature);
+    const cd = JSON.parse(L.text(cdj)), id = b64u(new Uint8Array(cred.rawId)), mine = !!stored && stored.id === id;
+    let check;
+    if (mine && stored.spki && stored.alg === -7) {
+      let ok = false;
+      try { ok = L.verifyPasskey(fromB64(stored.spki), auth, cdj, sig); } catch (e) { ok = false; }
+      check = ok ? sp("ok", "✓ valid, checked with this talk's own P-256 code") : sp("bad", "✗ invalid");
+    } else if (mine) check = sp("m", "not an ES256 key, so this demo can't check it");
+    else check = sp("m", "a passkey from another visit or device: this browser doesn't have its public key\n               (a real site would look it up in its database)");
+    out.innerHTML = `${sp("ok", "LOGGED IN WITH YOUR PASSKEY")}${mine && stored.made ? sp("m", `  (created ${stored.made})`) : ""}\n\n` +
+      `credential ID  ${esc(cut(id, 32))}\n` +
+      `challenge      ${esc(cut(b64u(challenge), 32))}  ${cd.challenge === b64u(challenge) ? sp("ok", "signed back unchanged") : sp("bad", "different!")}\n` +
+      `signed origin  ${esc(cd.origin)}  ${cd.origin === location.origin ? sp("ok", "this site") : sp("bad", "not this site")}\n` +
+      `user verified  ${auth[32] & 0x04 ? "yes (fingerprint, face or PIN)" : "no, presence only"}\n` +
+      `signature      ${esc(cut(L.hex(sig), 44))}\n` +
+      `check          ${check}`;
+  }
+  async function pkReal() {
+    const out = $("pk-out"), btn = $("pk-real");
+    if (!window.PublicKeyCredential || !navigator.credentials || !window.isSecureContext) {
+      out.innerHTML = `${sp("bad", "Passkeys aren't available here.")}\n${sp("m", "They need a modern browser and an https page, like the live site.")}`;
+      return;
+    }
+    btn.disabled = true; btn.textContent = "Waiting for your device…";
+    try {
+      const stored = pkLoad();
+      if (stored) await pkUse(out, stored); else await pkCreate(out);
+    } catch (e) {
+      out.innerHTML = e && e.name === "NotAllowedError"
+        ? `${sp("m", "Cancelled, timed out, or no passkey was chosen.")}\n${sp("m", "Nothing was created or sent.")}`
+        : `${sp("bad", "The browser said: " + esc((e && e.message) || e))}`;
+    } finally { btn.disabled = false; pkRealLabel(); }
+  }
+  function pkForget() {
+    pkSave(null); pkRealLabel();
+    $("pk-out").innerHTML = `${sp("m", "Forgotten in this browser. The passkey itself stays in your password manager")}\n${sp("m", 'until you delete it there (look for "Crypto 101 demo").')}`;
   }
 
   // --------------------------------------------------------------------------- checkpoints (slides 9, 16, 25, 32)
@@ -794,6 +929,7 @@
     click("otp-new", () => { otpKey = randLetters(L.letters($("otp-msg").value).length); otp(); });
     otpReuse(); click("otp-reuse-new", () => { reuseKey = L.randBytes(16); otpReuse(); });
     enigmaInit();
+    bind(["enc-in", "enc-b64"], encoding);
     bind("hve-in", hve);
     checkpoints();
     bind(["av-in", "av-bit"], avalanche);
@@ -829,6 +965,10 @@
     bind(["sig-msg", "sig-recv"], signatures);
     click("ecdsa-reuse", (e) => busy(e.currentTarget, () => ecdsa(true)));
     click("ecdsa-fresh", (e) => busy(e.currentTarget, () => ecdsa(false)));
+    for (const a of ["register", "login", "phish"]) click("pk-" + a, (e) => busy(e.currentTarget, () => passkey(a)));
+    click("pk-real", pkReal);
+    click("pk-forget", pkForget);
+    pkRealLabel();
     lattice();
     $("lat-canvas").addEventListener("click", (e) => {
       const r = e.currentTarget.getBoundingClientRect();

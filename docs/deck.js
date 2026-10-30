@@ -18,6 +18,7 @@
   const mode = () => (root.classList.contains("mode-presenter") ? "presenter" : root.classList.contains("mode-scroll") ? "scroll" : "slides");
   const indexOf = (id) => Math.max(0, slides.findIndex((s) => s.id === id));
   const titleOf = (s) => (s.querySelector("h2, h1") || {}).textContent || s.id;
+  const skip = (s) => (s && s.dataset.skip ? " · SKIPPABLE" : "");
   const notesOf = (s) => (s.querySelector(".notes") || {}).innerHTML || "<p>No notes for this slide.</p>";   // our own static markup
 
   // ---------------------------------------------------------------------------- slide furniture
@@ -121,7 +122,7 @@
     if (location.hash !== "#" + s.id) history.replaceState(null, "", "#" + s.id);
     $("ui-count").textContent = `${cur + 1} / ${slides.length}`;
     $("progress-bar").style.width = `${((cur + 1) / slides.length) * 100}%`;
-    $("notes-title").textContent = `${s.dataset.num} · ${titleOf(s)}`;
+    $("notes-title").textContent = `${s.dataset.num} · ${titleOf(s)}${skip(s)}`;
     $("notes-text").innerHTML = notesOf(s);
     document.querySelectorAll(".scroll-parts a").forEach((a) => a.classList.toggle("active", +a.dataset.part === +s.dataset.part));
     if (mode() === "presenter") presenterDraw();
@@ -179,7 +180,7 @@
     const o = $("overview");
     if (o.hidden) {
       $("overview-list").innerHTML = slides.map((s, i) =>
-        `<li class="${i === cur ? "here" : ""}"><button type="button" data-i="${i}"><small>${i + 1} · ${s.querySelector(".eyebrow") ? s.querySelector(".eyebrow").textContent : ""}</small>${titleOf(s)}</button></li>`).join("");
+        `<li class="${i === cur ? "here" : ""}"><button type="button" data-i="${i}"><small>${i + 1} · ${s.querySelector(".eyebrow") ? s.querySelector(".eyebrow").textContent : ""}</small>${titleOf(s)}${s.dataset.skip ? '<em class="skip">skippable</em>' : ""}</button></li>`).join("");
       o.hidden = false;
       const here = o.querySelector(".here button");
       if (here) here.focus();
@@ -267,10 +268,10 @@
   function presenterDraw() {
     const s = slides[cur], n = slides[cur + 1];
     $("pr-count").textContent = `Slide ${cur + 1} of ${slides.length} · deck slide ${s.dataset.num}`;
-    $("pr-eyebrow").textContent = (s.querySelector(".eyebrow") || {}).textContent || "";
+    $("pr-eyebrow").textContent = ((s.querySelector(".eyebrow") || {}).textContent || "") + skip(s);
     $("pr-title").textContent = titleOf(s);
     $("pr-notes").innerHTML = notesOf(s);
-    $("pr-next").textContent = n ? `${n.dataset.num} · ${titleOf(n)}` : "End of the deck";
+    $("pr-next").textContent = n ? `${n.dataset.num} · ${titleOf(n)}${skip(n) ? " (skippable)" : ""}` : "End of the deck";
     document.querySelectorAll("#pr-plan li").forEach((li) => li.classList.toggle("here", +li.dataset.part === +s.dataset.part));
   }
 
