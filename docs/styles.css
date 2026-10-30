@@ -168,8 +168,9 @@ kbd:first-child { margin-left: 0; }
 
 /* flow chains: box → box → box */
 .chain { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.chain > span { padding: 7px 12px; border: 1px solid var(--line); background: var(--void); font-size: .88em; display: grid; line-height: 1.2; }
-.chain > span em { font: normal .72em var(--mono); color: var(--muted); }
+.chain > span { padding: 7px 12px; border: 1px solid var(--line); background: var(--void); font-size: .88em; display: block; line-height: 1.2; }
+.chain > span em { display: block; font: normal .72em var(--mono); color: var(--muted); }
+.chain > span sub { font-size: .7em; line-height: 0; }
 .chain > span.hot { border-color: var(--pink); color: var(--pink); box-shadow: 0 0 12px rgba(255, 46, 136, .2); }
 .chain > span.hot.c { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 12px rgba(0, 240, 255, .18); }
 .chain > i { font-style: normal; color: var(--muted); }
@@ -675,3 +676,16 @@ input[type="color"] { width: 72px; height: 40px; padding: 2px; background: var(-
 .cert dd { margin: 0; font-size: .85em; color: var(--fg); }
 .cert small { font: .62em var(--mono); color: var(--pink); letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
 @media (max-width: 560px) { .mode-scroll .cert > div { grid-template-columns: minmax(0, 1fr); } }
+
+/* Questions slide: deck link and discussion link side by side */
+.qr-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.qr-pair figure { margin: 0; display: grid; gap: 10px; align-content: start; }
+.qr-pair img { width: 150px; height: 150px; border: 1px solid var(--cyan); box-shadow: 0 0 18px var(--cyan-glow); }
+.qr-pair .ask img { border-color: var(--pink); box-shadow: 0 0 18px var(--pink-glow); }
+.qr-pair figcaption { font-size: .78em; color: var(--muted); }
+.qr-pair figcaption b { display: block; color: var(--fg); font-size: 1.15em; margin-bottom: 2px; }
+.qr-pair figcaption a { font: 600 .92em var(--mono); color: var(--cyan); overflow-wrap: anywhere; }
+.qr-pair .ask figcaption a { color: var(--pink); }
+.contact { font-size: .9em; color: var(--muted); }
+.contact a { font: 600 1em var(--mono); color: var(--yellow); }
+@media (max-width: 560px) { .mode-scroll .qr-pair { grid-template-columns: minmax(0, 1fr); } }

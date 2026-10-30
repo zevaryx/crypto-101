@@ -782,8 +782,20 @@
   }
 
   // --------------------------------------------------------------------------- elliptic curves (slide 29)
+  /** Size a canvas's pixels to how big it really is on screen, so graphs stay sharp at any zoom.
+      Drawing code keeps using the canvas's original width/height as its coordinate system. */
+  function sharp(cv) {
+    if (!cv.dataset.w) { cv.dataset.w = cv.width; cv.dataset.h = cv.height; }
+    const W = +cv.dataset.w, H = +cv.dataset.h, shown = cv.getBoundingClientRect().width;
+    const k = Math.min(4, Math.max(1, (shown ? shown / W : 1) * (window.devicePixelRatio || 1)));
+    const bw = Math.round(W * k), bh = Math.round(H * k);
+    if (cv.width !== bw || cv.height !== bh) { cv.width = bw; cv.height = bh; }
+    const g = cv.getContext("2d");
+    g.setTransform(bw / W, 0, 0, bh / H, 0, 0);
+    return { g, W, H };
+  }
   function eccReal() {
-    const cv = $("ecc-real"), g = cv.getContext("2d"), W = cv.width, H = cv.height;
+    const { g, W, H } = sharp($("ecc-real"));
     const X0 = -2.2, X1 = 3.2, Y0 = -4.6, Y1 = 4.6;
     const sx = (x) => ((x - X0) / (X1 - X0)) * W, sy = (y) => H - ((y - Y0) / (Y1 - Y0)) * H;
     const f = (x) => x ** 3 - x + 1, ROOT = -1.324718;
@@ -822,7 +834,7 @@
   function eccToy() {
     const T = L.TOY, a = +$("ecc-secret").value; $("ecc-secret-out").textContent = a;
     const mult = Array.from({ length: 18 }, (_, i) => T.mul(i + 1));
-    const cv = $("ecc-toy"), g = cv.getContext("2d"), W = cv.width, pad = 30, cell = (W - 2 * pad) / 16;
+    const { g, W } = sharp($("ecc-toy")), pad = 30, cell = (W - 2 * pad) / 16;
     const X = (x) => pad + Number(x) * cell, Y = (y) => W - pad - Number(y) * cell;
     g.fillStyle = css("--void"); g.fillRect(0, 0, W, W);
     g.strokeStyle = css("--panel-2"); g.lineWidth = 1;
@@ -898,7 +910,7 @@
   // --------------------------------------------------------------------------- lattices (slide 34)
   let latTarget = [300, 130];
   function lattice() {
-    const cv = $("lat-canvas"), g = cv.getContext("2d"), W = cv.width, H = cv.height, o = [W / 2, H / 2], b1 = [58, 16], b2 = [22, 50];
+    const { g, W, H } = sharp($("lat-canvas")), o = [W / 2, H / 2], b1 = [58, 16], b2 = [22, 50];
     g.fillStyle = css("--void"); g.fillRect(0, 0, W, H);
     const pts = [];
     for (let i = -12; i <= 12; i++) for (let j = -12; j <= 12; j++) {
@@ -1036,7 +1048,7 @@
     lattice();
     $("lat-canvas").addEventListener("click", (e) => {
       const r = e.currentTarget.getBoundingClientRect();
-      latTarget = [(e.clientX - r.left) * (e.currentTarget.width / r.width), (e.clientY - r.top) * (e.currentTarget.height / r.height)];
+      latTarget = [(e.clientX - r.left) * (+e.currentTarget.dataset.w / r.width), (e.clientY - r.top) * (+e.currentTarget.dataset.h / r.height)];
       lattice();
     });
     lwe();
@@ -1044,6 +1056,10 @@
     click("regev-new", () => { regevPk = L.regevKeygen(); regev(); });
     click("web-run", (e) => busy(e.currentTarget, website));
     padEncrypt();
+    const redraw = () => { eccReal(); eccToy(); lattice(); };
+    let redrawTimer;
+    window.addEventListener("resize", () => { clearTimeout(redrawTimer); redrawTimer = setTimeout(redraw, 120); });
+    document.addEventListener("deck:slide", (e) => { if (e.detail.querySelector("#ecc-real, #ecc-toy, #lat-canvas")) redraw(); });
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { eccReal(); eccToy(); lattice(); padDraw(); padEncrypt(); });
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();

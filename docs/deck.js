@@ -127,6 +127,7 @@
     document.querySelectorAll(".scroll-parts a").forEach((a) => a.classList.toggle("active", +a.dataset.part === +s.dataset.part));
     if (mode() === "presenter") presenterDraw();
     cpFollow(s);
+    document.dispatchEvent(new CustomEvent("deck:slide", { detail: s }));   // lets demos redraw at the right size
     if (broadcast && chan) chan.postMessage({ type: "go", id: s.id });
   }
   const next = () => show(cur + 1);
