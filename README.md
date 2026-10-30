@@ -2,15 +2,15 @@
 
 A two-hour beginner's talk on cryptography, built as a website. The slides and the live demos are the same page: every cipher, hash and key exchange on the slides runs in your browser as you click through.
 
-**Live deck: <https://zevaryx.github.io/crypto-101/>**
+**Live deck: <https://zevaryx.github.io/crypto-101/>** · made by [zevaryx](https://github.com/zevaryx). You're welcome to present it yourself; see the license below.
 
 The talk covers five parts, with a five-minute discussion checkpoint after each:
 
 1. **Foundations** (25 min): the four goals of cryptography, Caesar and Vigenère ciphers, the one-time pad, the Enigma machine, bits, bytes, hex and Base64, hashing vs encryption vs encoding
 2. **Hashing** (20 min): the avalanche effect, SHA-256 round by round, why MD5 and SHA-1 broke, salt and pepper, slow password hashing
-3. **Symmetric encryption** (35 min): XOR, AES step by step, modes from ECB to GCM, the ECB padlock picture, tampering and nonce reuse
+3. **Symmetric encryption** (35 min): XOR, AES step by step, modes from ECB to GCM, the ECB padlock picture, tampering and nonce reuse, why keys need good randomness
 4. **Asymmetric** (25 min): RSA with small numbers, elliptic curves, key exchange (with paint, then on P-256), digital signatures, passkeys (simulated, plus an optional real one)
-5. **The future and wrap-up** (15 min): post-quantum cryptography and lattices, a secure website from start to finish, takeaways
+5. **The future and wrap-up** (15 min): post-quantum cryptography and lattices, a secure website from start to finish, inspecting a real certificate, end-to-end encryption, takeaways
 
 ## Presenting
 

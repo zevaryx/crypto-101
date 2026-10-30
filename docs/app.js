@@ -348,6 +348,67 @@
     $("pk-out").innerHTML = `${sp("m", "Forgotten in this browser. The passkey itself stays in your password manager")}\n${sp("m", 'until you delete it there (look for "Crypto 101 demo").')}`;
   }
 
+  // --------------------------------------------------------------------------- randomness (Part 3): a clock-seeded generator vs the secure one
+  const lcg = (seed) => { let x = seed >>> 0; return () => (x = (Math.imul(1664525, x) + 1013904223) >>> 0); };
+  const lcgKey = (seed) => { const next = lcg(seed), b = new Uint8Array(16), dv = new DataView(b.buffer); for (let i = 0; i < 4; i++) dv.setUint32(4 * i, next()); return b; };
+  let rngState = null;
+  function rngMake() {
+    const seed = Math.floor(Date.now() / 1000), weak = lcgKey(seed), strong = L.randBytes(16), zero = new Uint8Array(16);
+    rngState = { seed, weak };
+    bitGrid($("rng-weak-grid"), weak, zero);
+    bitGrid($("rng-strong-grid"), strong, zero);
+    $("rng-weak").innerHTML = `seed  the clock: ${seed}\nkey   ${sp("y", L.hex(weak))}`;
+    $("rng-strong").innerHTML = `seed  from the operating system\nkey   ${sp("c", L.hex(strong))}`;
+    $("rng-attack").innerHTML = sp("m", "Both keys look like noise. Press the attacker button.");
+  }
+  function rngGuess() {
+    if (!rngState) rngMake();
+    const now = Math.floor(Date.now() / 1000), t0 = performance.now();
+    let tries = 0, found = null;
+    for (let s = now; s > now - 86400; s--) { tries++; if (L.equalBytes(lcgKey(s), rngState.weak)) { found = s; break; } }
+    $("rng-attack").innerHTML = (found !== null
+      ? `attacker: "it was made today, so try every second since midnight"\n  seed ${found} found after ${fmt(tries)} ${tries === 1 ? "try" : "tries"} (${ago(t0)})  ${sp("bad", "→ the same key")}`
+      : sp("m", "The weak key is more than a day old; make a new one.")) +
+      `\n\nsecure key: 2^128 possibilities, and no seed to guess  ${sp("ok", "safe")}`;
+  }
+
+  // --------------------------------------------------------------------------- end-to-end encryption (Part 5)
+  let e2e = null;
+  const e2eKey = (point) => L.hmacSha256(enc("e2e demo"), L.fromBig(point[0], 32)).slice(0, 16);
+  function safetyNumber(p1, p2) {                      // the same on both phones only if both saw the same two public keys
+    const [x, y] = [p1[0], p2[0]].sort((u, v) => (u < v ? -1 : 1));
+    const digits = L.toBig(L.sha256(L.concat(L.fromBig(x, 32), L.fromBig(y, 32))).slice(0, 13)).toString().padStart(30, "0").slice(0, 30);
+    return digits.match(/.{5}/g).join(" ");
+  }
+  function e2eSend(swap) {
+    const P = L.P256, rnd = () => L.randBelow(P.n - 1n) + 1n, msg = enc($("e2e-msg").value), t0 = performance.now();
+    if (!e2e) { const a = rnd(), b = rnd(); e2e = { a, A: P.mul(a), b, B: P.mul(b) }; }
+    const { a, A, b, B } = e2e, nonce = L.randBytes(12), short = (u) => cut(L.hex(u), 28);
+    let alice, server, bob, aliceSees, bobSees;
+    if (!swap) {
+      aliceSees = B; bobSees = A;
+      const { ct, tag } = L.gcmEncrypt(e2eKey(P.mul(a, B)), nonce, msg);
+      const got = L.text(L.gcmDecrypt(e2eKey(P.mul(b, A)), nonce, ct, tag));
+      alice = `encrypts with a key only\nshe and Bob share (ECDH)\n${sp("k", short(ct))}`;
+      server = `${sp("m", "TLS only:")} ${sp("bad", q(L.text(msg)))}\n${sp("m", "end-to-end:")} ${sp("ok", short(ct))}\n${sp("m", "it just passes this on")}`;
+      bob = `decrypts with the same key\n${sp("ok", q(got))}`;
+    } else {
+      const m = rnd(), M = P.mul(m);                    // the server hands each side its own key instead
+      aliceSees = M; bobSees = M;
+      const { ct, tag } = L.gcmEncrypt(e2eKey(P.mul(a, M)), nonce, msg);
+      const read = L.text(L.gcmDecrypt(e2eKey(P.mul(m, A)), nonce, ct, tag));
+      const again = L.gcmEncrypt(e2eKey(P.mul(m, B)), nonce, enc(read));
+      const got = L.text(L.gcmDecrypt(e2eKey(P.mul(b, M)), nonce, again.ct, again.tag));
+      alice = `encrypts to "Bob's" key\n${sp("bad", "(really the server's)")}\n${sp("k", short(ct))}`;
+      server = `swapped both keys, so it\ndecrypts: ${sp("bad", q(read))}\nthen re-encrypts for Bob`;
+      bob = `decrypts fine:\n${sp("ok", q(got))}\n${sp("m", "nothing looks wrong")}`;
+    }
+    $("e2e-alice").innerHTML = alice; $("e2e-server").innerHTML = server; $("e2e-bob").innerHTML = bob;
+    const sa = safetyNumber(A, aliceSees), sb = safetyNumber(bobSees, B);
+    $("e2e-safety").innerHTML = `safety number on Alice's phone  ${sa}\nsafety number on Bob's phone    ${sb}  ` +
+      (sa === sb ? sp("ok", "match: nobody is in the middle") : sp("bad", "DIFFERENT: someone swapped the keys")) + `  ${sp("m", `(${ago(t0)})`)}`;
+  }
+
   // --------------------------------------------------------------------------- checkpoints (slides 9, 16, 25, 32)
   // [question, hint, answer]: answers stay folded away so the room can discuss first
   const CHECKPOINTS = [
@@ -966,6 +1027,9 @@
     click("ecdsa-reuse", (e) => busy(e.currentTarget, () => ecdsa(true)));
     click("ecdsa-fresh", (e) => busy(e.currentTarget, () => ecdsa(false)));
     for (const a of ["register", "login", "phish"]) click("pk-" + a, (e) => busy(e.currentTarget, () => passkey(a)));
+    rngMake(); click("rng-make", rngMake); click("rng-guess", (e) => busy(e.currentTarget, rngGuess));
+    click("e2e-send", (e) => busy(e.currentTarget, () => e2eSend(false)));
+    click("e2e-swap", (e) => busy(e.currentTarget, () => e2eSend(true)));
     click("pk-real", pkReal);
     click("pk-forget", pkForget);
     pkRealLabel();

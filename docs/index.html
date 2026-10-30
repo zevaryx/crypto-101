@@ -59,7 +59,7 @@
       <p class="lede">How we keep digital information private and trustworthy: hashing, encryption, signatures, and what quantum computers change.</p>
       <p class="muted">No background needed · questions welcome any time</p>
       <p class="keys-hint"><kbd>→</kbd> next <kbd>N</kbd> notes <kbd>P</kbd> presenter <kbd>O</kbd> overview <kbd>F</kbd> full screen</p>
-      <div class="follow"><img src="qr.svg" alt="QR code linking to zevaryx.github.io/crypto-101" width="96" height="96"><p>Follow along and run every demo on your phone:<br><a href="https://zevaryx.github.io/crypto-101/">zevaryx.github.io/crypto-101</a></p></div>
+      <div class="follow"><img src="qr.svg" alt="QR code linking to zevaryx.github.io/crypto-101" width="96" height="96"><p>Follow along and run every demo on your phone:<br><a href="https://zevaryx.github.io/crypto-101/">zevaryx.github.io/crypto-101</a><br><span class="credit">Made by <a href="https://github.com/zevaryx">zevaryx</a></span></p></div>
     </div>
     <div class="frame hero-term">
       <div class="term-bar"><span>terminal</span><span class="dots"><i></i><i></i><i></i></span></div>
@@ -699,6 +699,36 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
   <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>GCM is counter-mode encryption plus a tag computed from the ciphertext and the key.</span></li><li><b class="show">Show</b><span>Right: two messages sent with the same key and nonce. c1 ⊕ c2 equals m1 ⊕ m2, so the secret stream cancelled out. Knowing &quot;Pay Bob $100&quot; reveals &quot;Meet at noon&quot;.</span></li><li><b class="say">Say</b><span>It&#x27;s the reused one-time pad from Part 1 all over again.</span></li><li><b class="say">Say</b><span>Use a counter for nonces so they never repeat.</span></li></ul></div>
 </section>
 
+<!-- ======================================================================= RANDOMNESS -->
+<section class="slide" id="randomness" data-part="3" data-num="24">
+  <header class="slide-head"><p class="eyebrow">// ENCRYPTION 09</p><h2>Randomness: keys must be unpredictable</h2></header>
+  <div class="slide-body stack">
+    <div class="cols-2">
+      <div class="stack">
+        <h3>Predictable generator, seeded with the clock</h3>
+        <div class="bitgrid bitgrid-128" id="rng-weak-grid"></div>
+        <pre class="term" id="rng-weak"></pre>
+      </div>
+      <div class="stack">
+        <h3>The browser's secure generator</h3>
+        <div class="bitgrid bitgrid-128" id="rng-strong-grid"></div>
+        <pre class="term" id="rng-strong"></pre>
+      </div>
+    </div>
+    <div class="controls">
+      <button type="button" class="btn btn-ghost btn-sm" id="rng-make">Make new keys</button>
+      <button type="button" class="btn" id="rng-guess">Play attacker</button>
+    </div>
+    <pre class="term" id="rng-attack"></pre>
+    <div class="cards-3">
+      <div class="card card-bad"><b>Debian OpenSSL, 2006–2008</b><span>A code change left only 32,768 possible keys on Debian and Ubuntu systems.</span></div>
+      <div class="card card-bad"><b>Android Bitcoin wallets, 2013</b><span>A weak random generator repeated ECDSA's k, and coins were stolen.</span></div>
+      <div class="card card-ok"><b>The rule</b><span>Use the system's secure generator: crypto.getRandomValues, Python's secrets, /dev/urandom. Never Math.random.</span></div>
+    </div>
+  </div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>Every key, salt, nonce and IV so far had to be random. Not &quot;looks random&quot;: unpredictable.</span></li><li><b class="show">Show</b><span>The two grids are two keys. Both look like noise; you can&#x27;t tell which one is weak.</span></li><li><b class="show">Show</b><span>Press &quot;Play attacker&quot;. The left key was seeded with the clock, so trying every second since midnight finds it almost at once.</span></li><li><b class="say">Say</b><span>This happens for real: Debian&#x27;s OpenSSL bug left 32,768 possible keys, and Android wallets in 2013 repeated ECDSA&#x27;s k. Part 4 has the PS3, which used the same k every time.</span></li><li><b class="say">Say</b><span>The rule: use the system&#x27;s secure generator (crypto.getRandomValues, Python&#x27;s secrets, /dev/urandom), never Math.random.</span></li><li><b class="next">Next</b><span>&quot;Time for checkpoint 3.&quot;</span></li></ul></div>
+</section>
+
 <!-- ======================================================================= 25 CHECKPOINT 3 -->
 <section class="slide slide-checkpoint" id="checkpoint-3" data-part="3" data-num="25">
   <header class="slide-head"><p class="eyebrow">// CHECKPOINT 3 · 5 MIN</p><h2>Pause and discuss</h2><button type="button" class="cp-timer" title="Click to pause or resume" aria-label="5-minute discussion timer. Click to pause or resume."><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="track" cx="60" cy="60" r="54"/><circle class="bar" cx="60" cy="60" r="54"/></svg><output>05:00</output><small>discussion</small></button></header>
@@ -1016,6 +1046,56 @@ Or try a real one.</pre>
   <div class="notes"><p class="time">~4 min</p><ul><li><b class="say">Say</b><span>Every idea from today, in one page load.</span></li><li><b class="say">Say</b><span>Walk the five steps: a certificate (signatures), a key exchange (asymmetric), encrypting the data (symmetric), tags (integrity), and logging in (hashing).</span></li><li><b class="show">Show</b><span>Press &quot;Load the page&quot;. Each step runs for real with small keys. Step 5 stores your password as an Argon2id hash, then checks a right and a wrong password.</span></li><li><b class="say">Say</b><span>Step 5 could skip the password entirely: that&#x27;s a passkey, from Part 4.</span></li><li><b class="ask">Ask</b><span>Which part of today does each step come from? <em>Answer: Signatures and key exchange: Part 4. Encryption and tags: Part 3. Password hashing: Part 2.</em></span></li></ul></div>
 </section>
 
+<!-- ======================================================================= CERTIFICATES -->
+<section class="slide" id="certificates" data-part="5" data-num="35">
+  <header class="slide-head"><p class="eyebrow">// PUTTING IT TOGETHER · CERTIFICATES</p><h2>Inspect a real certificate</h2></header>
+  <div class="slide-body cols-2 cols-wide-right">
+    <div class="stack">
+      <h3>Open this page's certificate</h3>
+      <ul class="rules">
+        <li><b>Chrome / Edge:</b> click the icon left of the address, then "Connection is secure", then "Certificate is valid".</li>
+        <li><b>Firefox:</b> click the padlock, then "Connection secure", then "More information", then "View Certificate".</li>
+        <li><b>Safari:</b> click the padlock, then "Show Certificate".</li>
+      </ul>
+      <p class="note">Easiest on a laptop; most phone browsers hide the details.</p>
+      <h3>The chain of trust</h3>
+      <div class="chain chain-sm"><span>Root CA <em>built into your browser</em></span><i></i><span class="hot">signs an intermediate CA</span><i></i><span class="hot c">which signs this site</span></div>
+      <p class="note">Your browser checks every signature up the chain, ending at a root it already trusts.</p>
+    </div>
+    <dl class="cert">
+      <div><dt>Issued to</dt><dd>The site's name. It must match the address bar.</dd><small>Authentication</small></div>
+      <div><dt>Issued by</dt><dd>The certificate authority (CA) that vouches for it.</dd><small>Part 4 · signatures</small></div>
+      <div><dt>Valid from / to</dt><dd>Usually a few months; sites renew automatically.</dd><small>Expired = browser warning</small></div>
+      <div><dt>Public key</dt><dd>The site's key: ECDSA P-256 or RSA 2048+.</dd><small>Part 4 · RSA and ECC</small></div>
+      <div><dt>Signature</dt><dd>The CA's signature over a hash of everything above.</dd><small>Parts 2 and 4</small></div>
+      <div><dt>Fingerprint</dt><dd>A SHA-256 hash of the whole certificate.</dd><small>Part 2 · hashing</small></div>
+      <div><dt>The file itself</dt><dd>Usually stored as Base64 text between BEGIN and END lines (PEM).</dd><small>Part 1 · encoding</small></div>
+    </dl>
+  </div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="show">Show</b><span>Open this page&#x27;s certificate in your own browser, live, using the steps on the left. Invite people with laptops to do the same.</span></li><li><b class="say">Say</b><span>Walk the fields on the right: who it&#x27;s for, who signed it, the dates, the public key, the CA&#x27;s signature, the fingerprint. Each one comes from an earlier part of the talk.</span></li><li><b class="say">Say</b><span>The chain: a root CA built into your browser signs an intermediate, which signs the site. Your browser checks every signature.</span></li><li><b class="ask">Ask</b><span>What happens if the certificate is for a different name, or has expired? <em>Answer: The browser shows a full-page warning. Don&#x27;t click through it.</em></span></li><li><b class="next">Next</b><span>&quot;The website hides your data from the network. What about from the server itself?&quot;</span></li></ul></div>
+</section>
+
+<!-- ======================================================================= E2EE -->
+<section class="slide" id="e2ee" data-part="5" data-num="35">
+  <header class="slide-head"><p class="eyebrow">// PUTTING IT TOGETHER · MESSAGING</p><h2>End-to-end encryption</h2></header>
+  <div class="slide-body stack">
+    <p class="note">The secure website protects you from eavesdroppers on the way, but the server reads everything. <b>End-to-end</b> means only Alice and Bob can.</p>
+    <div class="controls">
+      <label class="grow">Alice writes <input id="e2e-msg" value="See you at 7, bring snacks" spellcheck="false" autocomplete="off"></label>
+      <button type="button" class="btn" id="e2e-send">Send</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="e2e-swap">Server swaps the keys</button>
+    </div>
+    <div class="ecdh">
+      <div class="party"><b>Alice's phone</b><pre class="term" id="e2e-alice">Press Send.</pre></div>
+      <div class="wire"><span>the messaging server</span><pre class="term" id="e2e-server"></pre></div>
+      <div class="party"><b>Bob's phone</b><pre class="term" id="e2e-bob"></pre></div>
+    </div>
+    <pre class="term" id="e2e-safety"></pre>
+    <p class="note">Real apps like Signal and WhatsApp also change keys with every message (the Double Ratchet), so one stolen key reveals very little, and Signal now adds ML-KEM against future quantum computers.</p>
+  </div>
+  <div class="notes"><p class="time">~3 min</p><ul><li><b class="say">Say</b><span>With an ordinary secure website, the server itself reads your data. End-to-end encryption means only the two people talking can.</span></li><li><b class="show">Show</b><span>Press Send. The middle box shows the server&#x27;s view: with TLS only it sees the message; end-to-end it only passes on ciphertext, because Alice and Bob did ECDH with their own keys.</span></li><li><b class="show">Show</b><span>Press &quot;Server swaps the keys&quot;. The server hands each phone its own key, reads the message, and passes it on. Bob still gets it, so nothing looks wrong, but the safety numbers no longer match.</span></li><li><b class="say">Say</b><span>That&#x27;s why messaging apps let you compare a safety number or scan a QR code in person.</span></li><li><b class="say">Say</b><span>Real apps change keys with every message (the Double Ratchet), and Signal now adds ML-KEM: everything from today, in your pocket.</span></li></ul></div>
+</section>
+
 <!-- ======================================================================= 36 TAKEAWAYS -->
 <section class="slide" id="takeaways" data-part="5" data-num="36">
   <header class="slide-head"><p class="eyebrow">// WRAP-UP</p><h2>Key takeaways</h2></header>
@@ -1047,6 +1127,7 @@ Or try a real one.</pre>
         <li><a href="https://www.khanacademy.org/computing/computer-science/cryptography" target="_blank" rel="noopener">Khan Academy: Cryptography</a><span>Gentle video lessons on ciphers and the ideas behind them.</span></li>
         <li><b>Serious Cryptography</b><span>A book by Jean-Philippe Aumasson on how modern crypto works.</span></li>
       </ul>
+      <p class="credit-big">Made by <a href="https://github.com/zevaryx" target="_blank" rel="noopener">zevaryx</a>. Free to reuse for your own talk: the source is at <a href="https://github.com/zevaryx/crypto-101" target="_blank" rel="noopener">github.com/zevaryx/crypto-101</a> (MIT licence).</p>
       <p class="fine">Educational only: the ciphers here are written from scratch to show each step. Real software should use the Web Crypto API or a vetted library. Everything runs in your browser; nothing you type is sent anywhere. Password-hash timings use <a href="https://github.com/Daninet/hash-wasm" target="_blank" rel="noopener">hash-wasm</a> (MIT).</p>
     </div>
   </div>
@@ -1059,25 +1140,30 @@ Or try a real one.</pre>
   <div class="slide-body">
     <dl class="glossary">
       <div><dt>Plaintext / ciphertext</dt><dd>The readable message, and its scrambled form.</dd></div>
-      <div><dt>Key</dt><dd>The secret that locks and unlocks. Its length sets how hard it is to guess.</dd></div>
-      <div><dt>Cipher</dt><dd>The recipe for encrypting (AES, RSA). It can be public; only the key is secret.</dd></div>
-      <div><dt>Encoding</dt><dd>Writing bytes in another form, like hex or Base64. No key: anyone can reverse it.</dd></div>
+      <div><dt>Key</dt><dd>The secret that locks and unlocks. Longer means harder to guess.</dd></div>
+      <div><dt>Cipher</dt><dd>The recipe for encrypting (AES, RSA). It can be public.</dd></div>
+      <div><dt>Encoding</dt><dd>Bytes written another way, like hex or Base64. No key: anyone can reverse it.</dd></div>
       <div><dt>Hash</dt><dd>A fixed-size, one-way fingerprint of any data (SHA-256).</dd></div>
-      <div><dt>Salt</dt><dd>A random value stored with each password hash, so equal passwords get different hashes.</dd></div>
-      <div><dt>Pepper</dt><dd>One secret value mixed into every password hash, kept outside the database.</dd></div>
-      <div><dt>Nonce</dt><dd>A "number used once" that goes with each message. Never repeat one with the same key.</dd></div>
-      <div><dt>IV</dt><dd>Initialisation vector: a random starting value, for example in CBC mode.</dd></div>
-      <div><dt>Mode of operation</dt><dd>How a block cipher handles messages longer than one block: ECB, CBC, CTR, GCM.</dd></div>
-      <div><dt>Tag (MAC)</dt><dd>A short checksum made with the key. If the message changes, the tag no longer matches.</dd></div>
+      <div><dt>Salt</dt><dd>A random value per password, so equal passwords hash differently.</dd></div>
+      <div><dt>Pepper</dt><dd>One secret mixed into every password hash, kept outside the database.</dd></div>
+      <div><dt>Nonce</dt><dd>A number used once per message. Never repeat it with the same key.</dd></div>
+      <div><dt>IV</dt><dd>Initialisation vector: a random starting value, as in CBC mode.</dd></div>
+      <div><dt>Mode of operation</dt><dd>How a block cipher handles long messages: ECB, CBC, CTR, GCM.</dd></div>
+      <div><dt>Tag (MAC)</dt><dd>A short checksum made with the key. It fails if the message changes.</dd></div>
       <div><dt>Authenticated encryption</dt><dd>Encryption plus a built-in tamper check, like AES-GCM.</dd></div>
-      <div><dt>Public / private key</dt><dd>A key pair. Share the public one freely; the private one never leaves you.</dd></div>
-      <div><dt>Key exchange</dt><dd>Two people agree on a shared secret over a public channel (ECDH).</dd></div>
-      <div><dt>Digital signature</dt><dd>Proof made with a private key that anyone can check with the public key.</dd></div>
-      <div><dt>Passkey</dt><dd>A per-site key pair that replaces a password. You log in by signing a challenge.</dd></div>
-      <div><dt>Certificate</dt><dd>A public key plus a name, signed by an authority your browser trusts.</dd></div>
+      <div><dt>Public / private key</dt><dd>A key pair. Share the public one; the private one never leaves you.</dd></div>
+      <div><dt>Key exchange</dt><dd>Agreeing on a shared secret over a public channel (ECDH).</dd></div>
+      <div><dt>Digital signature</dt><dd>Made with a private key; anyone can check it with the public key.</dd></div>
+      <div><dt>Passkey</dt><dd>A per-site key pair that replaces a password. You log in by signing.</dd></div>
+      <div><dt>Certificate</dt><dd>A public key plus a name, signed by a certificate authority.</dd></div>
+      <div><dt>Certificate authority</dt><dd>An organisation your browser trusts to vouch for websites.</dd></div>
+      <div><dt>End-to-end encryption</dt><dd>Only the people talking hold the keys; the server sees ciphertext.</dd></div>
+      <div><dt>Safety number</dt><dd>A code both people compare to check nobody swapped their keys.</dd></div>
+      <div><dt>CSPRNG</dt><dd>A secure random number generator: output nobody can predict.</dd></div>
+      <div><dt>Seed</dt><dd>A generator's starting value. Guess the seed and you know its output.</dd></div>
       <div><dt>Collision</dt><dd>Two different inputs that give the same hash.</dd></div>
       <div><dt>Brute force</dt><dd>Trying every possible key or password until one works.</dd></div>
-      <div><dt>Post-quantum</dt><dd>Schemes built to resist large quantum computers, like ML-KEM and ML-DSA.</dd></div>
+      <div><dt>Post-quantum</dt><dd>Built to resist quantum computers, like ML-KEM and ML-DSA.</dd></div>
     </dl>
   </div>
   <div class="notes"><p class="time">Appendix</p><ul><li><b class="tip">Tip</b><span>Not part of the timed talk. It&#x27;s for people reading later, or for when someone asks &quot;what&#x27;s a nonce again?&quot;</span></li></ul></div>
