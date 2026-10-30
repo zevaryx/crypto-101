@@ -874,7 +874,7 @@
     $("ecc-toy-out").innerHTML = `G = (5, 1), the starting point. Each step adds G again:\n${list}19G = point at infinity  ${sp("m", "(this toy curve has only 19 points)")}\n\n` +
       `Alice: secret number ${sp("k", a)}, public point ${a}G = ${sp("y", `(${tgt[0]}, ${tgt[1]})`)}\n` +
       `forward is easy: add G to itself ${a} times.\nbackward, an attacker tries 1G, 2G, 3G… and finds a match after ${sp("bad", a)} tries.\n${sp("m", "Easy here; a real curve has about 2^256 points, too many to ever guess through.")}` +
-      (a === 4 ? `\n\n${sp("y", "A private key of 4: fine on a toy curve. eMudhra used it on a real CA key in 2026, and is now out of the TLS business.")}` : "");
+      (a === 4 ? `\n\n${sp("y", "A private key of 4? What are you, an eMudhra engineer?")}` : "");
   }
 
   // --------------------------------------------------------------------------- ECDH (slide 30)
