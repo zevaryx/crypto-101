@@ -49,6 +49,16 @@
     return `${bigWords(s / Y)} years`;
   }
 
+  // --------------------------------------------------------------------------- easter eggs
+  function passwordEgg(s) {
+    const t = s.trim().toLowerCase().replace(/\s+/g, " ");
+    if (t === "hunter2") return `\n\n${sp("m", "hunter2? funny, all I see is *******")}`;
+    if (t === "4") return `\n\n${sp("m", "4? That's not a password, that's an eMudhra private key.")}`;
+    if (t.includes("correct horse battery staple"))
+      return `\n\n${sp("y", "xkcd 936:")} ${sp("m", "four random words beat a short, complex password. Just don't use these four: everyone knows them now.")}`;
+    return "";
+  }
+
   // --------------------------------------------------------------------------- hero (slide 1)
   function hero() {
     const a = $("hero-a").value, b = $("hero-b").value;
@@ -58,7 +68,9 @@
     $("hero-hb").innerHTML = [...xb].map((c, i) => (c !== xa[i] ? `<span class="diff">${c}</span>` : c)).join("");
     let changed = 0;
     for (let i = 0; i < Math.max(a.length, b.length); i++) if (a[i] !== b[i]) changed++;
-    $("hero-note").innerHTML = a === b
+    $("hero-note").innerHTML = !a || !b
+      ? "# even nothing has a fingerprint:<br># e3b0c442… is the SHA-256 of an empty input."
+      : a === b
       ? "# same input, same hash. try changing one letter."
       : `# ${changed === 1 ? "one letter changed" : "inputs differ"}.<br># a completely different hash: ${L.bitDiff(ha, hb)} of 256 bits flipped.`;
   }
@@ -73,7 +85,10 @@
       return `<span class="${row}${used.has(c) ? " used" : ""}">${ch}</span>`;
     }).join("");
     $("caesar-alpha").innerHTML = cells("p") + cells("q");
-    $("caesar-result").innerHTML = msg ? `${esc(msg)}<span class="arrow">→</span><span class="k">${esc(ct)}</span>` : sp("m", "type a message");
+    const egg = L.letters(msg) === "HAL" && k === 1 ? "I'm sorry, Dave. (HAL, from 2001: A Space Odyssey, shifted by 1)"
+      : L.letters(ct) === "NEVERROLLYOUROWNCRYPTO" ? "You solved the puzzle hidden in this page's source. Tell zevaryx!" : "";
+    $("caesar-result").innerHTML = (msg ? `${esc(msg)}<span class="arrow">→</span><span class="k">${esc(ct)}</span>` : sp("m", "type a message")) +
+      (egg ? `<small class="egg">${esc(egg)}</small>` : "");
 
     const long = L.letters(ct).length > 12;
     let best = -1, bestScore = Infinity;
@@ -551,7 +566,8 @@
     const table = new Map(COMMON.map((w) => [H(enc(w)), w]));
     const plain = H(pw), cracked = table.get(plain);
     $("salt-none").innerHTML = `stored = sha256(password)\n\nalice ${cut(plain, 24)}\nbob   ${cut(plain, 24)}\n${sp("bad", "same hash → same password")}\n\n` +
-      `attacker's pre-computed table:\n${cracked ? sp("bad", `cracked: ${q(cracked)}`) : sp("m", "not in this tiny table, but real\nrainbow tables hold billions")}`;
+      `attacker's pre-computed table:\n${cracked ? sp("bad", `cracked: ${q(cracked)}`) : sp("m", "not in this tiny table, but real\nrainbow tables hold billions")}` +
+      passwordEgg($("salt-pw").value);
     const sa = H(saltA, pw), sb = H(saltB, pw);
     $("salt-salt").innerHTML = `stored = salt + hash(salt + password)\n\nalice ${sp("c", L.hex(saltA))} ${cut(sa, 12)}\nbob   ${sp("c", L.hex(saltB))} ${cut(sb, 12)}\n${sp("ok", "different hashes")}\n\n` +
       `table lookup: ${table.has(sa) ? sp("bad", "match") : sp("ok", "no match")}\nthe attacker must crack each\nuser separately.`;
@@ -857,7 +873,8 @@
     const tgt = mult[a - 1];
     $("ecc-toy-out").innerHTML = `G = (5, 1), the starting point. Each step adds G again:\n${list}19G = point at infinity  ${sp("m", "(this toy curve has only 19 points)")}\n\n` +
       `Alice: secret number ${sp("k", a)}, public point ${a}G = ${sp("y", `(${tgt[0]}, ${tgt[1]})`)}\n` +
-      `forward is easy: add G to itself ${a} times.\nbackward, an attacker tries 1G, 2G, 3G… and finds a match after ${sp("bad", a)} tries.\n${sp("m", "Easy here; a real curve has about 2^256 points, too many to ever guess through.")}`;
+      `forward is easy: add G to itself ${a} times.\nbackward, an attacker tries 1G, 2G, 3G… and finds a match after ${sp("bad", a)} tries.\n${sp("m", "Easy here; a real curve has about 2^256 points, too many to ever guess through.")}` +
+      (a === 4 ? `\n\n${sp("y", "A private key of 4: fine on a toy curve. eMudhra used it on a real CA key in 2026, and is now out of the TLS business.")}` : "");
   }
 
   // --------------------------------------------------------------------------- ECDH (slide 30)
@@ -994,7 +1011,14 @@
   }
 
   // --------------------------------------------------------------------------- start
+  const PUZZLE = "QVJJUkUgRUJZWSBMQkhFIEJKQSBQRUxDR0I=";
+  function consolePuzzle() {
+    console.log("%cCRYPTO 101", "font: 700 28px monospace; color: #ff2e88; text-shadow: 0 0 8px #ff2e88");
+    console.log(`%cA secret for the curious:\n\n    ${PUZZLE}\n\nEvery tool you need is in this deck.\nFirst undo the encoding, then the oldest cipher in the talk.`, "font: 14px monospace; color: #00f0ff");
+  }
+
   function start() {
+    consolePuzzle();
     bind(["hero-a", "hero-b"], hero);
     bind(["caesar-msg", "caesar-key"], caesar);
     bind(["vig-msg", "vig-key"], vigenere);

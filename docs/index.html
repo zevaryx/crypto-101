@@ -33,6 +33,14 @@
 </script>
 </head>
 <body>
+<!--
+  Hello, source reader. A secret for the curious:
+
+      QVJJUkUgRUJZWSBMQkhFIEJKQSBQRUxDR0I=
+
+  Every tool you need is in this deck.
+  First undo the encoding, then the oldest cipher in the talk.
+-->
 
 <!-- ======================================================================= scroll-mode bar -->
 <nav class="scroll-nav" aria-label="Parts of the talk">
@@ -839,7 +847,7 @@ make t passes over it</pre><span>Needs lots of memory for every guess, so graphi
     </div>
     <pre class="term" id="ecc-toy-out"></pre>
   </div>
-  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Add G to itself again and again: G, 2G, 3G… The points jump around unpredictably.</span></li><li><b class="show">Show</b><span>Alice&#x27;s secret is 7, so her public point is 7G = (0, 6).</span></li><li><b class="say">Say</b><span>Forward is easy. Backward, an attacker must try 1G, 2G, 3G… until one matches. With 19 points that&#x27;s trivial; a real curve has about 2^256.</span></li></ul></div>
+  <div class="notes"><p class="time">~2 min</p><ul><li><b class="say">Say</b><span>Add G to itself again and again: G, 2G, 3G… The points jump around unpredictably.</span></li><li><b class="show">Show</b><span>Alice&#x27;s secret is 7, so her public point is 7G = (0, 6).</span></li><li><b class="say">Say</b><span>Forward is easy. Backward, an attacker must try 1G, 2G, 3G… until one matches. With 19 points that&#x27;s trivial; a real curve has about 2^256.</span></li><li><b class="tip">Joke</b><span>Drag the secret to 4. In October 2026 the certificate authority eMudhra was caught using P-384 CA keys of 3 to 8 bits; one private key was literally 4. Anyone could forge a certificate for any site in milliseconds. Browsers blocked them within days and eMudhra left the TLS business.</span></li></ul></div>
 </section>
 
 <!-- ======================================================================= 30 KEY EXCHANGE, THE IDEA -->

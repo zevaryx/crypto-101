@@ -343,8 +343,8 @@ pre.code { margin: 0; font: .72em/1.55 var(--mono); color: var(--yellow); backgr
 .alpha .used { background: var(--pink); color: var(--void); }
 .big-result { font: 600 1.6em var(--mono); overflow-wrap: anywhere; }
 .big-result .arrow { color: var(--pink); margin: 0 .5em; }
-.brute { list-style: none; margin: 0; padding: 0; font: .76em/1.55 var(--mono); columns: 3; column-gap: 18px; }
-.brute li { break-inside: avoid; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brute { list-style: none; margin: 0; padding: 0; font: .76em/1.55 var(--mono); columns: 3; column-gap: 18px; min-width: 0; overflow: hidden; }
+.brute li { break-inside: avoid; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .brute li b { color: var(--fg); font-weight: 400; }
 .brute li.best, .brute li.best b { color: var(--ok); font-weight: 700; }
 .bars { display: grid; grid-template-columns: repeat(26, minmax(0, 1fr)); align-items: end; gap: 2px; height: 150px; }
@@ -689,3 +689,6 @@ input[type="color"] { width: 72px; height: 40px; padding: 2px; background: var(-
 .contact { font-size: .9em; color: var(--muted); }
 .contact a { font: 600 1em var(--mono); color: var(--yellow); }
 @media (max-width: 560px) { .mode-scroll .qr-pair { grid-template-columns: minmax(0, 1fr); } }
+
+/* easter-egg line under the Caesar result */
+.big-result .egg { display: block; margin-top: 6px; font: 500 .55em var(--mono); color: var(--yellow); }
